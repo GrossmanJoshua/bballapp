@@ -1,0 +1,98 @@
+<html>
+<head>
+
+<!--<title>West Concord Ballers</Title>-->
+<title>Concord Noontime Basketball</title>
+
+   <!--<link href='http://fonts.googleapis.com/css?family=Vollkorn:400italic,400' rel='stylesheet' type='text/css'>-->
+   <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
+   <!-- <link href='http://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>-->
+   <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+   <meta name="viewport" content="width=device-width"/>
+
+   <link rel="shortcut icon" href="favicon.ico" />
+   <link rel="apple-touch-icon" href="touchicon.png" />
+   <link rel="stylesheet" type="text/css" href="bball.css" />
+
+<script type="text/javascript">
+function myAddress(myText, styleInfo)
+{
+ var name = 'West' + 'Concord' + 'Ballers';
+ var at = String.fromCharCode(64);
+ var domain = 'yahoogroups' + String.fromCharCode(46) + 'com';
+ var tag = 'a';
+ myText = (typeof myText === "undefined") ? (name + at + domain) : myText;
+ document.write('<' + tag + ' ' + styleInfo + ' href="mailto:' + name + at + domain + '">' + myText + '</' + tag + '>');
+}
+function myAdminAddress(myText)
+{
+ var name = 'admin';
+ var at = String.fromCharCode(64);
+ var domain = 'concord-lunchtime-bball' + String.fromCharCode(46) + 'appspotmail' + String.fromCharCode(46) + 'com';
+ document.write('<a' + ' href="mailto:' + name + at + domain + '?subject=re%3A%20game%20day">' + myText + '</a>');
+}
+function qualifyURL(url) {
+	var a = document.createElement('a');
+	a.href = url;
+	return a.href;
+}
+</script>
+<head>
+<body>
+
+<!--<h1>West Concord Ballers</h1>-->
+<h1>Concord Noontime Basketball</h1>
+
+<table style="width:100%"><tr>
+<td class="td_button desk25mobile50"><a class="a_button full_height" href="../roster">Roster</a></td>
+<td class="td_button desk25mobile50"><a class="a_button full_height" href="/signup">I Wanna Play Today!</a></td>
+<!--<td class="td_button optional_mobile" style="width:25%;"><script type="text/javascript">myAddress('Email the group','class="a_button full_height"')</script></td>-->
+<!--<td class="td_button optional_mobile" style="width:25%;"><a class="a_button full_height" href="http://groups.yahoo.com/group/WestConcordBallers" target="_blank">Subscribe to emails</a></td>-->
+</tr>
+</table>
+
+<!--
+<iframe id="forecast_embed" type="text/html" height="245" width="100%" frameborder="0" src="http://forecast.io/embed/#lat=42.45831&lon=-71.400468&name=Concord&color=#1047A9"> </iframe>
+-->
+
+<p>The basketball games in Concord are managed via an automated email system.
+An email will come out every morning at <span id="emph">7:00AM</span> announcing the game.
+Follow the directions there to add yourself to the game roster. You should get an email saying if the game is on or off at <span id="emph">~11:00</span>.</p>
+
+<p>
+If you would like to receive daily messages, send an email to the following address requesting addition:
+</p>
+
+<p id="indented">
+ <script type="text/javascript">myAdminAddress('Basketball administrator')</script>
+</p>
+
+<p>The roster for today's game can be viewed at any time at the following URL:</p>
+
+<p id="indented"><a href="../roster" target="_blank"><script type="text/javascript">document.write(qualifyURL("../roster"))</script></a></p>
+ 
+<p>When there is a game, it is played at noon at:</p>
+
+<!--
+<p id="block">Percy Rideout Playground</p>
+<a href="http://goo.gl/maps/LH5GZ" target="_blank"><p id="block">Intersection of Laws Brook Road and Conant St</p>
+<p id="block">West Concord, MA 01742</p></a>
+ 
+<p>Courts are on the Laws Brook Road side of the park.</p>
+
+<iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3081.5904116212882!2d-71.399879!3d42.457339999999995!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e3908e05aced69%3A0xdb622158aef8cecc!2sRideout+Playground!5e1!3m2!1sen!2sus!4v1411135681769" width="95%" height="450" frameborder="0" style="border:0"></iframe>
+-->
+
+
+<!-- -->
+<p id="block">Hunt Recreation Center</p>
+<a href="https://goo.gl/maps/tN72M" target="_blank"><p id="block">90 Stow St</p>
+<p id="block">Concord, MA 01742</p></a>
+
+<p></p>
+
+<iframe class="optional_mobile" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2943.632630738138!2d-71.350981!3d42.456832!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e39a471eb5ee4d%3A0x8d9659de078ed235!2sHunt+Recreation+Center%2C+90+Stow+St%2C+Concord%2C+MA+01742!5e0!3m2!1sen!2sus!4v1411135520200" width="95%" height="450" frameborder="0" style="border:0"></iframe>
+<!-- -->
+
+</body>
+</html>

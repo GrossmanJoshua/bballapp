@@ -1,0 +1,17 @@
+cron:
+
+# Could be replaced with M-F Intellicast Weather reports
+- description: daily summary job  
+  url: /control?function=startRoster&arg1=False
+  schedule: every mon,wed,fri 07:00
+  timezone: US/Eastern
+
+- description: daily summary job  
+  url: /control?function=postRoster&arg1=False
+  schedule: every mon,tue,wed,thu,fri 11:00
+  timezone: US/Eastern
+
+- description: daily summary job  
+  url: /control?function=removePlayers
+  schedule: every mon,tue,wed,thu,fri 17:00
+  timezone: US/Eastern
