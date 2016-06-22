@@ -14,7 +14,7 @@ def emailFromAdmin(recipient, sub, content, wholelist=False):
     else:
       to = []
 
-    if wholelist and IS_ALIST_ACTIVE:
+    if wholelist and bballdb.getUseAlist():
       with open(ALIST_FILE, "r") as f:
         for line in f:
           line = line.strip()

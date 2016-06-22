@@ -34,3 +34,5 @@ MAXIMUM_NUMBER_OF_PLAYERS = 12
 # Set this to false for the summer
 IS_ALIST_ACTIVE = True
 
+# Maximum number of players in the previous day's game to start a Tues/Thurs game
+MAX_NUM_PLAYERS_TUES_THURS = 0

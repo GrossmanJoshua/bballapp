@@ -36,6 +36,14 @@ class GameStatus(ndb.Model):
     inSignup = ndb.BooleanProperty(required=True)
     timestamp = ndb.DateTimeProperty(auto_now=True)
 
+class UseAList(ndb.Model):
+
+    useAlist = ndb.BooleanProperty(required=True)
+
+class LastGameNumberPlayers(ndb.Model):
+
+    numPlayers = ndb.IntegerProperty(required=True)
+
 class Player(ndb.Model):
 
     name = ndb.StringProperty(required=True)
@@ -131,8 +139,7 @@ def addPlayer(person,pref_str):
       raise InvalidEmailException("Invalid email %s" % person)
 
     # Get whether the player is a-list
-    global IS_ALIST_ACTIVE
-    if IS_ALIST_ACTIVE:
+    if getUseAlist():
       isAlist = playerIsAlist(email)
     else:
       # If the alist is not being used, it's always false
@@ -205,6 +212,64 @@ def removeSignUpPlayer(sender):
     return retVal, sender
     
 
+def setLastGameNumPlayers(val):
+    Akey = ndb.Key('LastGameNumberPlayers','Bball')
+    try:
+        status = Akey.get()
+        if not status: raise Exception
+    except:
+        logging.info("LastGameNumberPlayers object entity does not exist -- creating...")
+        status = LastGameNumberPlayers(key=Akey)
+
+    status.numPlayers = val
+    status.put()
+
+    logging.info("setLastGameNumPlayers to %d" % status.numPlayers)
+    return "Last game number of players is now %d" % val
+
+def getLastGameNumPlayers():
+    Akey = ndb.Key('LastGameNumberPlayers','Bball')
+    try:
+        status = Akey.get()
+        if not status: raise Exception
+    except:
+        logging.info("LastGameNumberPlayers object entity does not exist -- creating...")
+        status = LastGameNumberPlayers(key=Akey)
+        status.numPlayers = 0
+        status.put()
+
+
+    return status.numPlayers
+    
+def setUseAlist(state):
+    Akey = ndb.Key('UseAList','Bball')
+    try:
+        status = Akey.get()
+        if not status: raise Exception
+    except:
+        logging.info("UseAList object entity does not exist -- creating...")
+        status = UseAList(key=Akey)
+
+    status.useAlist = state
+    status.put()
+
+    logging.info("setUseAlist to %s" % ("True - winter" if status.useAlist else "False - summer") )
+    return "A-list mode is now %s" % str(state)
+
+def getUseAlist():
+    Akey = ndb.Key('UseAList','Bball')
+    try:
+        status = Akey.get()
+        if not status: raise Exception
+    except:
+        logging.info("UseAList object entity does not exist -- creating...")
+        status = UseAList(key=Akey)
+        status.useAlist = IS_ALIST_ACTIVE
+        status.put()
+
+
+    return status.useAlist
+    
 # Set sign up mode - True enables sign up mode, False disables
 def setGameStatus(state):
 
@@ -328,9 +393,17 @@ def numPlayers2pref( s ):
         return 8
     
 
-def startRoster(test):
+def startRoster(test, tues_thurs):
     if not getGameStatus():
         removePlayers()
+        
+        # If today is tuesday or thursday and yesterday's game didn't get many people and we're using "summer"
+        # rules, then start a game. Otherwise exit
+        #logging.info('%s, %d, %s' % (str(tues_thurs), getLastGameNumPlayers(), str(getUseAlist())))
+        if tues_thurs and (getLastGameNumPlayers() > MAX_NUM_PLAYERS_TUES_THURS or getUseAlist()):
+            logging.info("startRoster skipped - tuesday thursday")        
+            return False
+            
         setGameStatus(True)
         if not test: bballoutmail.gameDayMsg()
         return True
@@ -409,6 +482,11 @@ def postRoster(test):
         if not test: setGameStatus(False)
         gamestat = checkNoPlayers()
         
+        # Log the number of players
+        players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
+        signup_cnt = players.count()
+        setLastGameNumPlayers(signup_cnt)
+
         if gamestat.gameon:
             if not test: bballoutmail.gameRosterMsg(currentRoster(),gamestat.obligation)
             return (gamestat)

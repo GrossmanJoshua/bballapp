@@ -22,9 +22,10 @@ from bballconfig import *
 
 
 funcMap = { "setGameStatus" : (1,"bballdb"),
+            "setUseAlist"   : (1,"bballdb"),
             "addPlayer"     : (2,"bballdb"),
             "removePlayer"  : (1,"bballdb"),
-            "startRoster"   : (1,"bballdb"),
+            "startRoster"   : (2,"bballdb"),
             "postRoster"    : (1,"bballdb"),
             "removePlayers" : (0,"bballdb"),
             "currentRoster" : (0,"bballdb"),
@@ -43,6 +44,43 @@ def htmlHead():
 class MainPage(webapp2.RequestHandler):
     def get(self):
         return webapp2.redirect("/static/index.html")
+
+
+class DirectionsPage(webapp2.RequestHandler):
+    def get(self):
+        self.response.out.write('''
+        <html>
+        <head>
+           <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
+           <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+           <meta name="viewport" content="width=device-width"/>
+           <link rel="stylesheet" type="text/css" href="static/bball.css" />
+        </head>
+        <body>
+        ''')
+        if bballdb.getUseAlist():
+            self.response.out.write('''<p id="block">Hunt Recreation Center</p>
+                <a href="https://goo.gl/maps/tN72M" target="_blank"><p id="block">90 Stow St</p>
+                <p id="block">Concord, MA 01742</p></a>
+
+                <p></p>
+
+                <iframe class="optional_mobile" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2943.632630738138!2d-71.350981!3d42.456832!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e39a471eb5ee4d%3A0x8d9659de078ed235!2sHunt+Recreation+Center%2C+90+Stow+St%2C+Concord%2C+MA+01742!5e0!3m2!1sen!2sus!4v1411135520200" width="95%" height="450" frameborder="0" style="border:0"></iframe>
+               ''')
+        else:
+            self.response.out.write('''<p id="block">Percy Rideout Playground</p>
+                <a href="http://goo.gl/maps/LH5GZ" target="_blank"><p id="block">Intersection of Laws Brook Road and Conant St</p>
+                <p id="block">West Concord, MA 01742</p></a>
+ 
+                <p>Courts are on the Laws Brook Road side of the park.</p>
+
+                <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3081.5904116212882!2d-71.399879!3d42.457339999999995!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e3908e05aced69%3A0xdb622158aef8cecc!2sRideout+Playground!5e1!3m2!1sen!2sus!4v1411135681769" width="95%" height="450" frameborder="0" style="border:0"></iframe>
+                ''')
+        self.response.out.write('''
+        </body>
+        </html>
+        ''')
+
 
 class AlistPage(webapp2.RequestHandler):
     def get(self):
@@ -549,7 +587,7 @@ class Control(webapp2.RequestHandler):
 class StartSignup(webapp2.RequestHandler):
     def get(self):
         # Run Function and display result
-        funcRet = bballdb.startRoster(False)
+        funcRet = bballdb.startRoster(False, False)
         self.response.headers['Content-Type'] = 'text/html'
         self.response.out.write('''
             <html>
@@ -570,6 +608,7 @@ class StartSignup(webapp2.RequestHandler):
         
 # Web page mappings - each page maps to a Handler above
 app = webapp2.WSGIApplication([(r'/', MainPage),
+                               (r'/directions', DirectionsPage),
                                (r'/alist', AlistPage),
                                (r'/blist', BlistPage),
                                (r'/roster',Roster),
