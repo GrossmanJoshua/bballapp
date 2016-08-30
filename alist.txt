@@ -1,8 +1,5 @@
-mccollum_dennis@yahoo.com
 chris_cotton@stratus.com chris.cotton@stratus.com
-Richard.Brouillette@mt.com
 gshih@qti.qualcomm.com
-jonathan.frappier@gmail.com
 lukebegley74@yahoo.com
 twmitchell56@yahoo.com
 phochmut@gmail.com
@@ -10,7 +7,6 @@ chucklev@comcast.net
 kkilcoyne@welchs.com
 drt1430@aol.com
 creedbee99@comcast.net
-ekcnewbizdev@rcn.com
 nedc@ekcnewbizdev.com
 Dean_N_Mellis@raytheon.com
 info@campcaribou.com
@@ -23,3 +19,6 @@ arotman3@gmail.com
 bennet_ih@yahoo.com
 zhenying@qti.qualcomm.com
 mswallac2000@gmail.com mswallac@qti.qualcomm.com
+mhalberstein@yahoo.com
+chris.cenotti@gmail.com
+keppler77@yahoo.com
