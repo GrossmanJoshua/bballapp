@@ -40,6 +40,10 @@ enable the devel framework to communicate with google app engine system:
   C:\Python27\python.exe "C:\Program Files (x86)\Google\google_appengine\appcfg.py"
 )
 
+  On mac, might need this:
+
+     python2.7 /usr/local/bin/appcfg.py --email=jgrossman666@gmail.com update bballapp
+
 [check if python files open correctly]
 
 5)dev_appserver.py bballapp (to test)
