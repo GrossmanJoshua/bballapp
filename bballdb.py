@@ -11,8 +11,9 @@ from datetime import datetime, timedelta
 import random
 from bballconfig import *
 
-OPEN_START_HOUR = 7       # Start time of the open period
+OPEN_START_HOUR = 6       # Start time of the open period
 OPEN_END_HOUR = 11        # Time the list is posted
+OPEN_HOUR_RANDOM = 7       # Start time of the open period
 OPEN_MINUTES_RANDOM = 30  # How long at the start when we randomize time
 
 
@@ -172,13 +173,15 @@ def addPlayer(person,pref_str):
     player.put()
     
     # To stop a race to sign up right at the start, we randomize the start time
-    # for people who sign up in some window around 7am.
+    # for people who sign up before a pre-determine start time.
     ts = player.timestamp
     ts = ts + Eastern_tzinfo().utcoffset(ts)
-    if ts.hour == OPEN_START_HOUR and ts.minute < OPEN_MINUTES_RANDOM:
+    
+    if ts.hour < OPEN_HOUR_RANDOM or (ts.hour == OPEN_HOUR_RANDOM and ts.minute < OPEN_MINUTES_RANDOM):
       time_since_start = ts.minute*60 + ts.second
       offset = random.randint(0, OPEN_MINUTES_RANDOM*60) # Pick a random integer in the N minute range
       offset -= time_since_start  # Offset by the current start time so that we end up uniform in 0...N mins
+      offset += 3600 * (OPEN_HOUR_RANDOM-ts.hour)  # Offset by the extra hours to get after the open period
       player.timestamp += timedelta(seconds=offset)
       player.put() # add it back to the dB with the alternate timestamp
       
