@@ -7,13 +7,19 @@ from google.appengine.ext.db import BadValueError
 
 import bballoutmail
 from ustz import *
-from datetime import datetime
+from datetime import datetime, timedelta
+import random
 from bballconfig import *
+
+OPEN_START_HOUR = 7       # Start time of the open period
+OPEN_END_HOUR = 11        # Time the list is posted
+OPEN_MINUTES_RANDOM = 30  # How long at the start when we randomize time
+
 
 def isTimeBeforeListPost():
   now = datetime.now()
   hour = (now + Eastern_tzinfo().utcoffset(now)).hour
-  if hour < 11:
+  if (hour < OPEN_END_HOUR) and (hour >= OPEN_START_HOUR):
     return True
   else:
     return False
@@ -49,7 +55,7 @@ class Player(ndb.Model):
     name = ndb.StringProperty(required=True)
     email = ndb.StringProperty(required=True)
     preference = ndb.IntegerProperty(required=True)
-    timestamp = ndb.DateTimeProperty(auto_now=True)
+    timestamp = ndb.DateTimeProperty(auto_now_add=True)
     isAlist = ndb.BooleanProperty(required=True)
 
 class Subscriber(ndb.Model):
@@ -164,6 +170,18 @@ def addPlayer(person,pref_str):
                     preference = pref,
                     isAlist = isAlist)
     player.put()
+    
+    # To stop a race to sign up right at the start, we randomize the start time
+    # for people who sign up in some window around 7am.
+    ts = player.timestamp
+    ts = ts + Eastern_tzinfo().utcoffset(ts)
+    if ts.hour == OPEN_START_HOUR and ts.minute < OPEN_MINUTES_RANDOM:
+      time_since_start = ts.minute*60 + ts.second
+      offset = random.randint(0, OPEN_MINUTES_RANDOM*60) # Pick a random integer in the N minute range
+      offset -= time_since_start  # Offset by the current start time so that we end up uniform in 0...N mins
+      player.timestamp += timedelta(seconds=offset)
+      player.put() # add it back to the dB with the alternate timestamp
+      
     return signupPlayer(name, email, pref_str, True)
 
 rePref = re.compile(r'(([1-5])\s*[xX]\s*\2)')
