@@ -11,10 +11,13 @@ from datetime import datetime, timedelta, date, time
 import random
 from bballconfig import *
 
-OPEN_START_HOUR = 18      # Start time of the open period the day before
-OPEN_END_HOUR = 11        # Time the list is posted
+# OPEN_START_HOUR = 18      # Start time of the open period the day before
+OPEN_END_HOUR = 17        # Time the list is posted
 
-GAME_DAYS = (0,2,4)       # M, W, F
+DEFAULT_GAME_DAYS = (0,2,4)       # M, W, F
+DEFAULT_ROSTER_START_TIME = 7 # M
+DEFAULT_ROSTER_OPEN_TIME = 4 # roster open for this many hours
+DEFAULT_ROSTER_OPEN_HOURS = 13 # hours before start time that roster opens
 
 # The random window, right now 7:10-7:15
 RANDOM_MINUTES_START = 7 * 60 + 10
@@ -31,17 +34,39 @@ def isSignupOpen():
     return True
     
   # Otherwise check the time
-  now = datetime.utcnow()
-  now = now + Eastern_tzinfo().utcoffset(now)
-  # If it's a game day and we're before the signup list
-  if now.hour < OPEN_END_HOUR and now.weekday() in GAME_DAYS:
-    return True
+  now = localTimeNow()
   
-  # If it's the day before a game day and we're after the start time
-  elif now.hour >= OPEN_START_HOUR and ((now.weekday()+1) % 7) in GAME_DAYS:
+  # Load game properties
+  if now.hour >= OPEN_END_HOUR:
+    weekday = (now.weekday() + 1) % 7 # pick tomorrow's time
+  else:
+    weekday = now.weekday()
+  props = get_game_props(weekday)
+    
+  # Today is not a game day
+  if not props.isGameDay:
+    return False
+  
+  now_offset = now + timedelta(hours=props.openRosterHoursPrior)
+  
+  print now.hour, weekday, props.isGameDay, OPEN_END_HOUR, now_offset.hour, props.rosterOpenTime
+  
+  # Check if we're in the open window
+  if ((now_offset.hour >= props.rosterStartTime) and
+       (now_offset.hour < props.rosterStartTime + props.rosterOpenTime)):
     return True
   else:
     return False
+    
+  # # If it's a game day and we're before the signup list
+  # if now.hour < OPEN_END_HOUR and now.weekday() in GAME_DAYS:
+  #   return True
+  #
+  # # If it's the day before a game day and we're after the start time
+  # elif now.hour >= OPEN_START_HOUR and ((now.weekday()+1) % 7) in GAME_DAYS:
+  #   return True
+  # else:
+  #   return False
   
             
 class InvalidEmailException(Exception):
@@ -72,7 +97,13 @@ class GameProperties(ndb.Model):
     
     # If this is different from maxNumPlayers then we will cut people above this
     # number *unless* we get at least maxNumPlayers
-    provisionalNumPlayers = ndb.IntegerProperty(required=True) 
+    provisionalNumPlayers = ndb.IntegerProperty(required=True)
+    
+    # Game timing
+    isGameDay = ndb.BooleanProperty(required=True)
+    openRosterHoursPrior = ndb.IntegerProperty(required=True)
+    rosterStartTime = ndb.IntegerProperty(required=True)
+    rosterOpenTime = ndb.IntegerProperty(required=True)
                           
 class LastGameNumberPlayers(ndb.Model):
 
@@ -119,34 +150,41 @@ def today():
   today = datetime.today()
   return today + Eastern_tzinfo().utcoffset(today)
    
-def get_game_props():
+def get_game_props(weekday=None):
   '''Return a GameProperties object for the current day of the week'''
   q = GameProperties.query(ancestor = ndb.Key('GameStatus','Bball'),
                               default_options = ndb.QueryOptions(keys_only = True))
-  weekday = today().weekday()
-  
-  print weekday
+                              
+  if weekday is None:
+    weekday = today().weekday()
     
   dayKeys = q.filter(GameProperties.weekDay == weekday)
   if dayKeys.count():
       for dayProp in dayKeys:
           try:
             day = dayProp.get()
-          except BadValueError:
+          except BadValueError as e:
+            dayProp.delete()
             continue
             
           return day
-  else:
-      print 'no properties for today, initializing to default'
-      day = GameProperties(
-        parent = ndb.Key('GameStatus','Bball'),
-        weekDay = weekday,
-        minNumPlayers = 8,
-        maxNumPlayers = 12,
-        provisionalNumPlayers = 12
-      )
-      day.put()
-      return day
+          
+  logging.info('no properties for today, initializing to default')
+
+  day = GameProperties(
+    parent = ndb.Key('GameStatus','Bball'),
+    weekDay = weekday,
+    minNumPlayers = 8,
+    maxNumPlayers = 12,
+    provisionalNumPlayers = 12,
+    openRosterHoursPrior = DEFAULT_ROSTER_OPEN_HOURS,
+    rosterStartTime = DEFAULT_ROSTER_START_TIME,
+    rosterOpenTime = DEFAULT_ROSTER_OPEN_TIME,
+    isGameDay = weekday in DEFAULT_GAME_DAYS
+  )
+  
+  day.put()
+  return day
   
 # Update the player status
 def updatePlayerStatus(person, playing, signup_timestamp, overflow):
@@ -234,6 +272,12 @@ def getPlayerStatus():
 #    thu = ndb.BooleanProperty(required=True)
 #    fri = ndb.BooleanProperty(required=True)
     
+def localTimeNow():
+  ts = datetime.utcnow()
+  et = Eastern_tzinfo().utcoffset(ts)
+  ts = ts + et
+  return ts
+  
 # Returns a tuple of the full address, sanitized, and the raw email address
 def emailParser(email):
     email = email.strip()
@@ -280,7 +324,6 @@ def emailParser(email):
         return (name + " <" + addr + ">", addr.lower())
     
 def playerIsAlist(email):
-    return True
     email = email.strip()
     
     with open(ALIST_FILE, 'r') as alist:
@@ -595,7 +638,7 @@ def currentRoster():
           row=' '.join(row_classes),
           idx=idx,
           name=cgi.escape(player.name),
-          time=(player.timestamp - Eastern_tzinfo().utcoffset(player.timestamp)).strftime('%X'),
+          time=(player.timestamp + Eastern_tzinfo().utcoffset(player.timestamp)).strftime('%X'),
           score=player.priorityScore
         )
         
@@ -688,13 +731,13 @@ def finalizeEarlyRoster():
 
     # For players who start early, we randomize their time in some window
     # Get the time 
-    ts = datetime.utcnow()
+    ts = localTimeNow()
     ts = datetime(year=ts.year, month=ts.month, day=ts.day, hour=0, minute=0, second=0)
     et = Eastern_tzinfo().utcoffset(ts)
     
     for player in players:
       offset = random.randint(RANDOM_MINUTES_START*60, RANDOM_MINUTES_END*60) # Pick a random integer in the N minute range
-      player.timestamp = ts + timedelta(seconds=offset) + et
+      player.timestamp = ts + timedelta(seconds=offset) - et
       player.put() # add it back to the dB with the alternate timestamp
       
 def startRoster(test, tues_thurs):
@@ -792,7 +835,7 @@ def checkNoPlayers():
    #
    #      return gameOnStatus(True, cnt, obligation)
     else:
-      return gameOnStatus(False, cnt, [])
+      return gameOnStatus(False, 0, [], [])
 
 def savePlayerStatus(gamestat):
   '''Update everyone who signed-up's status'''
@@ -892,7 +935,6 @@ def validate_email(email):
       raise InvalidEmailException()
       return False
 
-    
 def signupRandomPlayers():
   '''Debug tool - signup 15 random players'''
   for i in range(1,16):
@@ -901,12 +943,12 @@ def signupRandomPlayers():
     
   players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
   
-  ts = datetime.utcnow()
+  ts = localTimeNow()
   ts = datetime(year=ts.year, month=ts.month, day=ts.day, hour=0, minute=0, second=0)
   et = Eastern_tzinfo().utcoffset(ts)
   
   for player in players:
     offset = random.randint(7*60*60, 8*60*60) # Pick a random integer in the N minute range
-    player.timestamp = ts + timedelta(seconds=offset) + et
+    player.timestamp = ts + timedelta(seconds=offset) - et
     player.isAlist = False if random.randint(0,2) == 0 else True
     player.put() # add it back to the dB with the alternate timestamp

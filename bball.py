@@ -553,7 +553,7 @@ class Roster(webapp2.RequestHandler):
           return retstr
 
     def get(self):
-        if bballdb.isEmailSent(): # sign-up is in progress, no game decision yet
+        if bballdb.isSignupOpen(): # sign-up is in progress, no game decision yet
           content = self.getInprogressPage()
         else: # final decisino has been made
           content = self.getGameDecisionPage()

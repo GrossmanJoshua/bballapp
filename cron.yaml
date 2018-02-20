@@ -3,7 +3,7 @@ cron:
 # Could be replaced with M-F Intellicast Weather reports
 - description: daily summary job  
   url: /control?function=startRoster&arg1=False&arg2=False
-  schedule: every mon,wed,fri 06:00
+  schedule: every mon,wed,fri 07:00
   timezone: US/Eastern
 
 # - description: daily summary job
