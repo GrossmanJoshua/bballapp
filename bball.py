@@ -123,14 +123,19 @@ class PlayersListPage(webapp2.RequestHandler):
 
       players = bballdb.getPlayerStatus()
       
-      for player in players:
+      def email_subst(email):
+        email = email.replace('@','-at-')
+        email = email.replace('.','-dot-')
+        return email
+        
+      for player in sorted(players, key=lambda i: i.email):
         self.response.out.write('''
         <tr><td>{email}</td><td>{prio}</td>
         <td>{sups}</td><td>{lastsup}</td><td>{suptime}</td>
         <td>{totp}</td><td>{m}</td><td>{w}</td><td>{f}</td><td>{lastp}</td>
         <td>{cut}</td><td>{lastcut}</td></tr>
         '''.format(
-          email=player.email,
+          email=email_subst(player.email),
           sups=player.numSignups,
           lastsup=player.lastSignup,
           suptime=player.signup_time(),
