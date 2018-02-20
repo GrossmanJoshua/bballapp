@@ -29,7 +29,8 @@ funcMap = { "setGameStatus" : (1,"bballdb"),
             "postRoster"    : (1,"bballdb"),
             "removePlayers" : (0,"bballdb"),
             "currentRoster" : (0,"bballdb"),
-            "checkNoPlayers": (0,"bballdb")}
+            "checkNoPlayers": (0,"bballdb"),
+            "signupRandomPlayers": (0, "bballdb")}
 
 def htmlHead():
   return '''
@@ -81,6 +82,68 @@ class DirectionsPage(webapp2.RequestHandler):
         </html>
         ''')
 
+class PlayersListPage(webapp2.RequestHandler):
+    def get(self):
+      self.response.out.write('''<html>
+       <head><title>Player List</title>
+       <link rel="shortcut icon" href="static/favicon.ico" />
+       <link rel="stylesheet" type="text/css" href="static/bball.css"/>
+       <meta name="viewport" content="width=640"/>
+       </head>
+       <body class="wide">
+       <div id="rosterbox">
+       <table class="playerlist" id="player_list_table">
+       <thead>
+         <tr>
+         <th></th>
+         <th></th>
+         <th colspan="3">Signups</th>
+         <th colspan="5">Games Played</th>
+         <th colspan="2">Missed Cut</th>
+         <tr>
+         <th class="widen">Email</th>
+         <th>Priority</th>
+         <th>Total</th><th>Last</th><th>Avg Signup Time</th>
+         <th>Total</th><th>M</th><th>W</th><th>F</th><th>Last</th>
+         <th>Total</th><th>Last</th>
+       </thead><tbody>
+       ''')
+      
+      # email = ndb.StringProperty(required=True)
+      # numSignups = ndb.IntegerProperty(required=True)
+      # gamesPlayedM = ndb.IntegerProperty(required=True)
+      # gamesPlayedW = ndb.IntegerProperty(required=True)
+      # gamesPlayedF = ndb.IntegerProperty(required=True)
+      # gamesCut = ndb.IntegerProperty(required=True)
+      # lastGame = ndb.DateProperty(required=True)
+      # lastSignup = ndb.DateProperty(required=True)
+      # averageSignupTime = ndb.FloatProperty(required=True)
+      # priorityScore = ndb.IntegerProperty(required=True)
+      # isAlist = ndb.BooleanProperty(required=True)
+
+      players = bballdb.getPlayerStatus()
+      
+      for player in players:
+        self.response.out.write('''
+        <tr><td>{email}</td><td>{prio}</td>
+        <td>{sups}</td><td>{lastsup}</td><td>{suptime}</td>
+        <td>{totp}</td><td>{m}</td><td>{w}</td><td>{f}</td><td>{lastp}</td>
+        <td>{cut}</td><td>{lastcut}</td></tr>
+        '''.format(
+          email=player.email,
+          sups=player.numSignups,
+          lastsup=player.lastSignup,
+          suptime=player.signup_time(),
+          totp=player.gamesPlayed,
+          m=player.gamesPlayedM,
+          w=player.gamesPlayedW,
+          f=player.gamesPlayedF,
+          lastp=player.lastGame,
+          cut=player.gamesCut,
+          lastcut=player.lastCut,
+          prio=player.priorityScore
+        ))
+      self.response.out.write('''</tbody></table></div></body></html>\n''')
 
 class AlistPage(webapp2.RequestHandler):
     def get(self):
@@ -133,8 +196,12 @@ def getRosterStr():
           <h1>Signup Roster</h1>
           <p style="text-align:center">%(time)s</p>
           <p id="emph" style="text-align:center">The following %(nump)d player%(s)s are currently signed up</p>
-          <div id="rosterbox">%(roster)s</div>
-          <p><span id="alist">Highlighted players</span> are on the "A-list" and not subject to excision. Other players will be cut from the team from the bottom of this list up as "A-list" players sign-up.</p>
+          <div class="rosterbox">%(roster)s</div>
+          <p><span class="alist">Highlighted players</span> are on the "A-list" and will not be bumped by players who are not on the A-list. You
+          may be bumped for up to 1 hour after your signup if another player with higher priority signs up (a player gets higher priority if
+          they have been recently cut from games due to too many players). A name will be shaded <span style="color:#FC002D">red</span>,
+          until that happens. Non-A-list players will be cut from the team from the bottom of this list
+          up as "A-list" players sign-up.</p>
           ''' % {
             'time':cgi.escape(bballdb.getGameDateTime()),
             'nump':len(roster.roster_list),
@@ -147,7 +214,7 @@ def getRosterStr():
           <p>The following %(nump)d player%(s)s signed up but aren't in the final game
           at this time. If someone on the game roster (above) drops out, the first person from this list will be added
           to the game. After the final roster goes out, if you are on the game roster but for any reason can't make the game, please offer your spot to these players.</p>
-          <div id="rosterbox">%(roster)s</div>
+          <div class="rosterbox">%(roster)s</div>
           ''' % {
             'nump':len(roster.alt_roster_list),
             's':'s' if len(roster.alt_roster_list)>1 else '',
@@ -159,7 +226,7 @@ class AddName(webapp2.RequestHandler):
     def get(self):
 
 
-        if bballdb.getGameStatus(): # Game sign-up is open
+        if bballdb.isSignupOpen(): # Game sign-up is open
             #logging.info(repr(self.request.headers['Cookie']))
             try:
               defaultUserName = self.request.cookies['emailAddress']
@@ -198,20 +265,20 @@ class AddName(webapp2.RequestHandler):
                   </form>
                 </body>
               </html>''' % {'title':PAGE_TITLE,'name':defaultUserName, 'focus':js_focus, 'head':htmlHead()})
-        elif bballdb.isTimeBeforeListPost(): # Signup is off, but early enough that someone could start the list
-            self.response.out.write('''
-             <html>
-               <head><title>%(title)s Basketball - Start Sign-up</title>
-               %(head)s
-               </head>
-               <body>
-                  <h1>Start the Signup for %(title)s Basketball</h1>
-                  <p>The signup list has not been started yet. If you would like to start
-                  the sign-up list (i.e. send out an email asking for players, etc.), click
-                  the <i>Start Sign-up List</i> button below.</p>
-                  <p><a class="a_button" href="/startSignup">Start Sign-up List</a></p>
-                </body>
-              </html>''' % {'title':PAGE_TITLE, 'head':htmlHead()})
+        # elif bballdb.isTimeBeforeListPost(): # Signup is off, but early enough that someone could start the list
+        #     self.response.out.write('''
+        #      <html>
+        #        <head><title>%(title)s Basketball - Start Sign-up</title>
+        #        %(head)s
+        #        </head>
+        #        <body>
+        #           <h1>Start the Signup for %(title)s Basketball</h1>
+        #           <p>The signup list has not been started yet. If you would like to start
+        #           the sign-up list (i.e. send out an email asking for players, etc.), click
+        #           the <i>Start Sign-up List</i> button below.</p>
+        #           <p><a class="a_button" href="/startSignup">Start Sign-up List</a></p>
+        #         </body>
+        #       </html>''' % {'title':PAGE_TITLE, 'head':htmlHead()})
         else: # After the game, frozen
             self.response.out.write('''
               <html>
@@ -271,7 +338,7 @@ class AddName(webapp2.RequestHandler):
         rosterstr = getRosterStr()
         
         roster = bballdb.currentRoster()
-        matches_email = [x for x in roster.roster_list if x[0] == newPlayer.full_email]
+        matches_email = [x for x in roster.roster_list if x.name == newPlayer.full_email]
         if matches_email:
           tag = '<p id="status">You have been added to the roster as "%(player)s"</p>' % {'player':cgi.escape(player)}
         else:
@@ -300,7 +367,7 @@ class RemoveName(webapp2.RequestHandler):
     def get(self):
 
 
-        if bballdb.getGameStatus():
+        if bballdb.isEmailSent():
             #logging.info(repr(self.request.headers['Cookie']))
             try:
               defaultUserName = self.request.cookies['emailAddress']
@@ -486,7 +553,7 @@ class Roster(webapp2.RequestHandler):
           return retstr
 
     def get(self):
-        if bballdb.getGameStatus(): # sign-up is in progress, no game decision yet
+        if bballdb.isEmailSent(): # sign-up is in progress, no game decision yet
           content = self.getInprogressPage()
         else: # final decisino has been made
           content = self.getGameDecisionPage()
@@ -616,5 +683,6 @@ app = webapp2.WSGIApplication([(r'/', MainPage),
                                (r'/signup',AddName),
                                (r'/startSignup',StartSignup),
                                (r'/quit',RemoveName),
+                               (r'/players',PlayersListPage),
                                (r'/subscribe',AddSubscriber),
                                (r'/unsubscribe',RemoveSubscriber)],debug=True)

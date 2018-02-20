@@ -16,6 +16,10 @@ padding:3px;
 border-width:1px;
 margin:0px;*/
 }
+body.wide {
+  max-width: 1280px;
+}
+
 #note{
   font-size:90%;
   /*font-family: Raleway,varela,"century gothic",helvetica,arial,sans-serif;*/
@@ -89,6 +93,43 @@ td .a_button{
  height:100%;
 }
 
+table.playerlist {
+  border-collapse: collapse;
+}
+
+table.playerlist td, table.playerlist th {
+  border: 1px solid #AB7500;
+  padding: 2px 8px 2px 8px;
+  margin: 0px;
+  white-space: nowrap;
+  text-align: center;
+}
+
+table#player_list_table td {
+  font-size: 10pt;
+}
+
+table.playerlist tr.alist td {
+/*  background-color: LightYellow;*/
+}
+
+table.playerlist tr.safe td {
+/*  background-color: #D3FBD3;*/
+}
+
+table.playerlist tr.notsafe td {
+  background-color: #FAD8DE;
+}
+
+th.widen, td.widen {
+  width: 99%;
+}
+
+table.playerlist th {
+  background-color: #d29105;
+  color: white;
+}
+
 .a_button:hover {
 	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #d29105), color-stop(1, #f6b33d) );
 	background:-moz-linear-gradient( center top, #d29105 5%, #f6b33d 100% );
@@ -114,10 +155,10 @@ h2 {
 #forecast_embed {
   width:100%;
   border-top-style:solid;
-  border-top-color:#A68700;
+  border-top-color:#AB7500;
   border-top-width:2px;
   border-bottom-style:solid;
-  border-bottom-color:#A68700;
+  border-bottom-color:#AB7500;
   border-bottom-width:2px;
   margin-top:20px;
   margin-bottom:30px;
@@ -129,7 +170,7 @@ pre {
   text-align:center;
   text-indent:0px;
   border-style:solid;
-  border-color:#A68700;
+  border-color:#AB7500;
   /*border-color:#999999;*/
   border-width:2px;
   margin:10px;
@@ -143,18 +184,18 @@ pre {
   -webkit-box-shadow: 3px 3px 4px #CCC;
   box-shadow: 3px 3px 4px #CCC;
 }
-#alist { color:blue; font-weight:bold; }
+.alist { color:#025C69; font-weight:bold; }
 
-#rosterbox {
+.rosterbox {
   font-family: varela,"century gothic",helvetica,arial,sans-serif;
   /*font-family:Helvetica Neue,Helvetica,Calibri,Verdana,Arial,Liberation Sans,DejaVu Sans,sans-serif;*//*Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;*/
   /*width:600px;*/
   text-align:center;
   text-indent:0px;
   border-style:solid;
-  border-color:#A68700;
+  border-color:#AB7500;
   /*border-color:#999999;*/
-  border-width:2px;
+  border-width:1px;
   margin:10px;
   /*border-left-width:0px;
   border-right-width:0px;*/

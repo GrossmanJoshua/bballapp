@@ -183,7 +183,7 @@ http://%s.appspot.com/
 """  % (APP_NAME, APP_NAME, APP_NAME, APP_NAME), wholelist=True )
 
 
-def gameRosterMsg(roster, obligation):
+def gameRosterMsg(roster):
     dt = datetime.datetime.today().strftime("%a %b %d %Y")
     
     # Get the alternate roster, if any
