@@ -207,7 +207,7 @@ def getRosterStr(current_user=None):
           may be bumped for up to 1 hour after your signup if another player with higher priority signs up (a player gets higher priority if
           they have been recently cut from games due to too many players). A name will be shaded <span style="color:#FC002D">red</span>,
           until that happens. Non-A-list players will be cut from the team from the bottom of this list
-          up as "A-list" players sign-up.</p>
+          up as "A-list" players sign-up. An asterisk denotes a player who used early signup.</p>
           ''' % {
             'time':cgi.escape(bballdb.getGameDateTime()),
             'nump':len(roster.roster_list),
@@ -519,7 +519,7 @@ class Roster(webapp2.RequestHandler):
         current_user = self.request.cookies['emailAddress']
       except:
         current_user = None
-      roster = bballdb.currentRoster(current_user=current_user)
+      roster = bballdb.currentRoster(current_user=current_user, nocolor=True)
       if not gamestat.gameon: # no game, no one signed up
           if gamestat.numplayers == 0:
               return '''
@@ -561,13 +561,13 @@ class Roster(webapp2.RequestHandler):
                 's':'s' if len(roster.alt_roster_list)>1 else '',
                 'roster':roster.alt_roster_list_html
               }
-          elif gamestat.obligation:
-              obligation = "Only people who specified %s when they signed up are obliged to play." + \
-                           "Others may play if they like." % (' or '.join(gamestat.obligation))
-
-              retstr += '''<p><i>%(obligation)s</i></p>\n''' % {
-                  'obligation':obligation.strip()
-              }
+          # elif gamestat.obligation:
+          #     obligation = "Only people who specified %s when they signed up are obliged to play." + \
+          #                  "Others may play if they like." % (' or '.join(gamestat.obligation))
+          #
+          #     retstr += '''<p><i>%(obligation)s</i></p>\n''' % {
+          #         'obligation':obligation.strip()
+          #     }
           return retstr
 
     def get(self):

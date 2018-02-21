@@ -125,18 +125,18 @@ table.playerlist tr.notsafe td {
   background-color: #FAD8DE;
 }
 
-table.playerlist tr.blist td {
+/*table.playerlist tr.blist td {
   background-color: #FAD8DE;
 }
-
+*/
 table.playerlist tr.notsafe.its_me td {
   background-color: #F38D9F;
 }
 
-table.playerlist tr.blist.its_me td {
+/*table.playerlist tr.blist.its_me td {
   background-color: #F38D9F;
 }
-
+*/
 th.widen, td.widen {
   width: 99%;
 }

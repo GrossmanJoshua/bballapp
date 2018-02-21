@@ -122,6 +122,7 @@ class Player(ndb.Model):
     email = ndb.StringProperty(required=True)
     preference = ndb.IntegerProperty(required=True)
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
+    earlySignup = ndb.BooleanProperty(required=True)
     priorityScore = ndb.IntegerProperty(required=False)
     isAlist = ndb.BooleanProperty(required=True)
 
@@ -408,7 +409,8 @@ def addPlayer(person,pref_str):
                     name=name,
                     preference = pref,
                     priorityScore = priorityScore,
-                    isAlist = isAlist)
+                    isAlist = isAlist,
+                    earlySignup = isEarlySignup())
     player.put()
     
     # # To stop a race to sign up right at the start, we randomize the start time
@@ -618,7 +620,7 @@ def removePlayers():
     setGameStatus(False)
     return True
     
-def currentRoster(current_user=None):
+def currentRoster(current_user=None, nocolor=False):
     class roster(object):
       '''roster_list is the list of players playing. alt_roster_list is the list of alternate
       players who signed up but didn't make the cut'''
@@ -632,8 +634,8 @@ def currentRoster(current_user=None):
 
       def table_row(self, idx, player, cur_time=None):
         row_classes = []
-        if cur_time is not None:
-          if player.timestamp < cur_time:
+        if cur_time is not None and nocolor == False:
+          if player.timestamp < cur_time and player.isAlist:
             row_classes.append('safe')
           else:
             row_classes.append('notsafe')
@@ -648,13 +650,14 @@ def currentRoster(current_user=None):
         return '''<tr class="{row}">
         <td>{idx}</td>
         <td>{name}</td>
-        <td>{time}</td>
+        <td>{time}{early}</td>
         <td>{score}</td>
         </tr>'''.format(
           row=' '.join(row_classes),
           idx=idx,
           name=cgi.escape(player.name),
           time=(player.timestamp + Eastern_tzinfo().utcoffset(player.timestamp)).strftime('%X'),
+          early=('<sup>*</sup>' if player.earlySignup else ''),
           score=player.priorityScore
         )
         
@@ -975,7 +978,7 @@ def signupRandomPlayers():
   et = Eastern_tzinfo().utcoffset(ts)
   
   for player in players:
-    offset = random.randint(7*60*60, 8*60*60) # Pick a random integer in the N minute range
+    offset = random.randint(7*60*60, 9*60*60) # Pick a random integer in the N minute range
     player.timestamp = ts + timedelta(seconds=offset) - et
     player.isAlist = False if random.randint(0,2) == 0 else True
     player.put() # add it back to the dB with the alternate timestamp
