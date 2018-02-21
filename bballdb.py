@@ -725,9 +725,15 @@ def sort_player_list(playerKeys):
   b_list = sorted([x for x in myPlayers if not x.isAlist], cmp=playerHasPriority)
         
   full_list = a_list + b_list
-        
+  
+  # The provisional list is the A-list when we have an A-list, otherwise it's everyone
+  if getUseAlist():
+    provisional_list = a_list
+  else:
+    provisional_list = full_list
+    
   # Determine the number of players
-  if (len(a_list) > game_props.provisionalNumPlayers and
+  if (len(provisional_list) > game_props.provisionalNumPlayers and
       len(full_list) >= game_props.maxNumPlayers):
      # We have > PROISIONAL A-listers and more players than MAX, use MAX
      cutoff = game_props.maxNumPlayers
