@@ -113,12 +113,28 @@ table.playerlist tr.alist td {
 /*  background-color: LightYellow;*/
 }
 
+table.playerlist tr.its_me td {
+  background-color: #FFF69A;
+}
+
 table.playerlist tr.safe td {
 /*  background-color: #D3FBD3;*/
 }
 
 table.playerlist tr.notsafe td {
   background-color: #FAD8DE;
+}
+
+table.playerlist tr.blist td {
+  background-color: #FAD8DE;
+}
+
+table.playerlist tr.notsafe.its_me td {
+  background-color: #F38D9F;
+}
+
+table.playerlist tr.blist.its_me td {
+  background-color: #F38D9F;
 }
 
 th.widen, td.widen {

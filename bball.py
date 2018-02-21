@@ -26,6 +26,7 @@ funcMap = { "setGameStatus" : (1,"bballdb"),
             "addPlayer"     : (2,"bballdb"),
             "removePlayer"  : (1,"bballdb"),
             "startRoster"   : (2,"bballdb"),
+            "startEarlyRoster" : (0, "bballdb"),
             "postRoster"    : (1,"bballdb"),
             "removePlayers" : (0,"bballdb"),
             "currentRoster" : (0,"bballdb"),
@@ -194,8 +195,8 @@ class BlistPage(webapp2.RequestHandler):
         self.response.out.write('<span id="blist">%s</span></br>\n' % cgi.escape(line))
       self.response.out.write('''</div></body></html>\n''')
 
-def getRosterStr():
-    roster = bballdb.currentRoster()
+def getRosterStr(current_user=None):
+    roster = bballdb.currentRoster(current_user=current_user)
     #logging.info("getInprogressPage %s" % (str(roster))) 
     retstr = '''
           <h1>Signup Roster</h1>
@@ -339,33 +340,35 @@ class AddName(webapp2.RequestHandler):
         # Save the current address to the cookie  
         self.response.set_cookie('emailAddress', player, max_age=31536000, secure=False)
         
-        # Get the roster pane
-        rosterstr = getRosterStr()
+        self.redirect("/roster")
         
-        roster = bballdb.currentRoster()
-        matches_email = [x for x in roster.roster_list if x.name == newPlayer.full_email]
-        if matches_email:
-          tag = '<p id="status">You have been added to the roster as "%(player)s"</p>' % {'player':cgi.escape(player)}
-        else:
-          tag = '<p id="status" style="background-color:red">Your name has been registered but you are not currently on the active roster because too many people have signed up before you</p>'
-        
-        self.response.out.write('''
-        <html>
-          <head><title>%(title)s Basketball Sign-up</title>
-              %(head)s
-          </head>
-          <body>
-          %(tag)s
-          %(roster)s
-          <table style="width:100%%"><tr>
-          <td class="td_button" style="width:50%%;"><a class="a_button full_height" href="/roster">Roster</a></td>
-          <td class="td_button" style="width:50%%;"><a class="a_button full_height" href="/">Home Page</a></td>
-          </tr>
-          </table>
-          <!--<p><i>[click <a href="/roster">here</a> to view the roster at any time]</i></p>-->
-          <!--<p>Back to the <a href="/">%(title)s Basketball home page</a></p>-->
-          </body>
-        </html>''' % {'title':PAGE_TITLE, 'tag':tag, 'roster':rosterstr, 'head':htmlHead()})
+        # # Get the roster pane
+        # rosterstr = getRosterStr()
+        #
+        # roster = bballdb.currentRoster()
+        # matches_email = [x for x in roster.roster_list if x.name == newPlayer.full_email]
+        # if matches_email or bballdb.isEarlySignup():
+        #   tag = '<p id="status">You have been added to the roster as "%(player)s"</p>' % {'player':cgi.escape(player)}
+        # else:
+        #   tag = '<p id="status" style="background-color:red">Your name has been registered but you are not currently on the active roster because too many people have signed up before you</p>'
+        #
+        # self.response.out.write('''
+        # <html>
+        #   <head><title>%(title)s Basketball Sign-up</title>
+        #       %(head)s
+        #   </head>
+        #   <body>
+        #   %(tag)s
+        #   %(roster)s
+        #   <table style="width:100%%"><tr>
+        #   <td class="td_button" style="width:50%%;"><a class="a_button full_height" href="/roster">Roster</a></td>
+        #   <td class="td_button" style="width:50%%;"><a class="a_button full_height" href="/">Home Page</a></td>
+        #   </tr>
+        #   </table>
+        #   <!--<p><i>[click <a href="/roster">here</a> to view the roster at any time]</i></p>-->
+        #   <!--<p>Back to the <a href="/">%(title)s Basketball home page</a></p>-->
+        #   </body>
+        # </html>''' % {'title':PAGE_TITLE, 'tag':tag, 'roster':rosterstr, 'head':htmlHead()})
 
 
 class RemoveName(webapp2.RequestHandler):
@@ -495,7 +498,13 @@ class RemoveSubscriber(webapp2.RequestHandler):
 class Roster(webapp2.RequestHandler):
 
     def getInprogressPage(self):
-      retstr = getRosterStr()
+      try:
+        current_user = self.request.cookies['emailAddress']
+      except:
+        print('no cookie')
+        current_user = None
+        
+      retstr = getRosterStr(current_user=current_user)
       retstr += '''            <table style="width:100%%"><tr>
             <td class="td_button" style="width:50%%"><a class="a_button full_height" href="/signup">Sign up for today's game</a></td>
             <td class="td_button" style="width:50%%"><a class="a_button full_height" href="/quit">Quit today's game</a></td>
@@ -506,7 +515,11 @@ class Roster(webapp2.RequestHandler):
     def getGameDecisionPage(self):
       gamestat = bballdb.checkNoPlayers()
       gametime = cgi.escape(bballdb.getGameDateTime())
-      roster = bballdb.currentRoster()
+      try:
+        current_user = self.request.cookies['emailAddress']
+      except:
+        current_user = None
+      roster = bballdb.currentRoster(current_user=current_user)
       if not gamestat.gameon: # no game, no one signed up
           if gamestat.numplayers == 0:
               return '''

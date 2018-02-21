@@ -12,12 +12,12 @@ import random
 from bballconfig import *
 
 # OPEN_START_HOUR = 18      # Start time of the open period the day before
-OPEN_END_HOUR = 17        # Time the list is posted
+# OPEN_END_HOUR = 17        # Time the list is posted
 
-DEFAULT_GAME_DAYS = (0,2,4)       # M, W, F
-DEFAULT_ROSTER_START_TIME = 7 # M
-DEFAULT_ROSTER_OPEN_TIME = 4 # roster open for this many hours
-DEFAULT_ROSTER_OPEN_HOURS = 13 # hours before start time that roster opens
+# DEFAULT_GAME_DAYS = (0,2,4)       # M, W, F
+# DEFAULT_ROSTER_START_TIME = 7 # M
+# DEFAULT_ROSTER_OPEN_TIME = 4 # roster open for this many hours
+# DEFAULT_ROSTER_OPEN_HOURS = 13 # hours before start time that roster opens
 
 # The random window, right now 7:10-7:15
 RANDOM_MINUTES_START = 7 * 60 + 10
@@ -26,37 +26,43 @@ RANDOM_MINUTES_END = RANDOM_MINUTES_START + 5
 CUT_SCORE_INCREMENT = 3   # How much to inc priority by when cut
 PRIORITY_TIMING = timedelta(hours=1)  # If you have the higher cut-score, how much time does that buy you
 
+def isEarlySignup():
+  '''The early signup phase'''
+  status = getGameStatus()
+  return status.inEarlySignup
+  
 def isSignupOpen():
   '''True if signup is open'''
   # Any time the game is open, it's open
   status = getGameStatus()
-  if status.inSignup:
-    return True
-    
-  # Otherwise check the time
-  now = localTimeNow()
-  
-  # Load game properties
-  if now.hour >= OPEN_END_HOUR:
-    weekday = (now.weekday() + 1) % 7 # pick tomorrow's time
-  else:
-    weekday = now.weekday()
-  props = get_game_props(weekday)
-    
-  # Today is not a game day
-  if not props.isGameDay:
-    return False
-  
-  now_offset = now + timedelta(hours=props.openRosterHoursPrior)
-  
-  print now.hour, weekday, props.isGameDay, OPEN_END_HOUR, now_offset.hour, props.rosterOpenTime
-  
-  # Check if we're in the open window
-  if ((now_offset.hour >= props.rosterStartTime) and
-       (now_offset.hour < props.rosterStartTime + props.rosterOpenTime)):
-    return True
-  else:
-    return False
+  return status.inSignup or status.inEarlySignup
+  # if status.inSignup:
+  #   return True
+  #
+  # # Otherwise check the time
+  # now = localTimeNow()
+  #
+  # # Load game properties
+  # if now.hour >= OPEN_END_HOUR:
+  #   weekday = (now.weekday() + 1) % 7 # pick tomorrow's time
+  # else:
+  #   weekday = now.weekday()
+  # props = get_game_props(weekday)
+  #
+  # # Today is not a game day
+  # if not props.isGameDay:
+  #   return False
+  #
+  # now_offset = now + timedelta(hours=props.openRosterHoursPrior)
+  #
+  # print now.hour, weekday, props.isGameDay, OPEN_END_HOUR, now_offset.hour, props.rosterOpenTime
+  #
+  # # Check if we're in the open window
+  # if ((now_offset.hour >= props.rosterStartTime) and
+  #      (now_offset.hour < props.rosterStartTime + props.rosterOpenTime)):
+  #   return True
+  # else:
+  #   return False
     
   # # If it's a game day and we're before the signup list
   # if now.hour < OPEN_END_HOUR and now.weekday() in GAME_DAYS:
@@ -84,6 +90,7 @@ prefMap = { "1x1":2,
 class GameStatus(ndb.Model):
 
     inSignup = ndb.BooleanProperty(required=True)
+    inEarlySignup = ndb.BooleanProperty(required=True)
     timestamp = ndb.DateTimeProperty(auto_now=True)
 
 class UseAList(ndb.Model):
@@ -100,10 +107,10 @@ class GameProperties(ndb.Model):
     provisionalNumPlayers = ndb.IntegerProperty(required=True)
     
     # Game timing
-    isGameDay = ndb.BooleanProperty(required=True)
-    openRosterHoursPrior = ndb.IntegerProperty(required=True)
-    rosterStartTime = ndb.IntegerProperty(required=True)
-    rosterOpenTime = ndb.IntegerProperty(required=True)
+    # isGameDay = ndb.BooleanProperty(required=True)
+    # openRosterHoursPrior = ndb.IntegerProperty(required=True)
+    # rosterStartTime = ndb.IntegerProperty(required=True)
+    # rosterOpenTime = ndb.IntegerProperty(required=True)
                           
 class LastGameNumberPlayers(ndb.Model):
 
@@ -177,10 +184,10 @@ def get_game_props(weekday=None):
     minNumPlayers = 8,
     maxNumPlayers = 12,
     provisionalNumPlayers = 12,
-    openRosterHoursPrior = DEFAULT_ROSTER_OPEN_HOURS,
-    rosterStartTime = DEFAULT_ROSTER_START_TIME,
-    rosterOpenTime = DEFAULT_ROSTER_OPEN_TIME,
-    isGameDay = weekday in DEFAULT_GAME_DAYS
+    # openRosterHoursPrior = DEFAULT_ROSTER_OPEN_HOURS,
+    # rosterStartTime = DEFAULT_ROSTER_START_TIME,
+    # rosterOpenTime = DEFAULT_ROSTER_OPEN_TIME,
+    # isGameDay = weekday in DEFAULT_GAME_DAYS
   )
   
   day.put()
@@ -524,7 +531,7 @@ def getUseAlist():
     return status.useAlist
     
 # Set sign up mode - True enables sign up mode, False disables
-def setGameStatus(state):
+def setGameStatus(state, early_state=False):
 
         
     GSkey = ndb.Key('GameStatus','Bball')
@@ -539,6 +546,7 @@ def setGameStatus(state):
         #status = GameStatus(inSignup = False, key_name='Bball')
         
     status.inSignup = state
+    status.inEarlySignup = early_state
       
     status.put()
 
@@ -555,6 +563,7 @@ def getGameStatus():
       logging.info("GameStatus object entity does not exist -- creating...")
       status = GameStatus(key=GSkey)
       status.inSignup = False
+      status.inEarlySignup = False
       status.put()
       
   return status
@@ -609,26 +618,33 @@ def removePlayers():
     setGameStatus(False)
     return True
     
-def currentRoster():
+def currentRoster(current_user=None):
     class roster(object):
       '''roster_list is the list of players playing. alt_roster_list is the list of alternate
       players who signed up but didn't make the cut'''
-      def __init__(self, roster_list, alt_roster_list):
+      def __init__(self, roster_list, alt_roster_list, current_user=None):
         self.roster_list = roster_list
         self.alt_roster_list = alt_roster_list
+        self.current_user = current_user
 
       def __str__(self):
         return 'roster_list=%s,alt_roster_list=%s' % (str(self.roster_list_str),str(self.alt_roster_list_str))
 
-      @classmethod
-      def table_row(cls, idx, player, cur_time=None):
+      def table_row(self, idx, player, cur_time=None):
         row_classes = []
-        if cur_time is not None and player.isAlist:
+        if cur_time is not None:
           if player.timestamp < cur_time:
             row_classes.append('safe')
           else:
             row_classes.append('notsafe')
         row_classes.append({True: 'alist', False: 'blist'}[player.isAlist])
+        
+        if self.current_user is not None:
+          _, email = emailParser(player.name)
+          
+          if email == self.current_user:
+            row_classes.append('its_me')
+          
         return '''<tr class="{row}">
         <td>{idx}</td>
         <td>{name}</td>
@@ -656,20 +672,23 @@ def currentRoster():
         return '''<table class="playerlist" id="playing">
         <thead><tr><th>#</th><th class="widen">Player</th><th>Signup Time</th><th>Priority</th></tr></thead>
         <tbody>{body}</tbody>
-        </table>'''.format(body='\n'.join(roster.table_row(idx, player, cur_time) for idx,player in enumerate(self.roster_list,start=1)))
+        </table>'''.format(body='\n'.join(self.table_row(idx, player, cur_time) for idx,player in enumerate(self.roster_list,start=1)))
 
       @property
       def alt_roster_list_html(self):
         return '''<table class="playerlist" id="cut">
         <thead><tr><th>#</th><th class="widen">Player</th><th>Signup Time</th><th>Priority</th></tr></thead>
         <tbody>{body}</tbody>
-        </table>'''.format(body='\n'.join(roster.table_row(idx, player) for idx,player in enumerate(self.alt_roster_list,start=1)))
+        </table>'''.format(body='\n'.join(self.table_row(idx, player) for idx,player in enumerate(self.alt_roster_list,start=1)))
 
+    if current_user is not None:
+      _, current_user = emailParser(current_user)
+      
     playerKeys = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
     if playerKeys.count():
       play_list, cut_list = sort_player_list(playerKeys)
       
-      return roster(play_list, cut_list)
+      return roster(play_list, cut_list, current_user=current_user)
 
     return roster([],[])
     
@@ -739,7 +758,15 @@ def finalizeEarlyRoster():
       offset = random.randint(RANDOM_MINUTES_START*60, RANDOM_MINUTES_END*60) # Pick a random integer in the N minute range
       player.timestamp = ts + timedelta(seconds=offset) - et
       player.put() # add it back to the dB with the alternate timestamp
-      
+
+def startEarlyRoster():
+    if not isSignupOpen():
+        setGameStatus(False, True)
+        return True
+        
+    logging.info("startEarlyRoster failed - already in early signup mode")        
+    return False
+
 def startRoster(test, tues_thurs):
     finalizeEarlyRoster()
       
