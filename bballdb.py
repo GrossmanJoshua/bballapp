@@ -842,6 +842,12 @@ def checkNoPlayers():
         self.play_list = play_list
         self.cut_list = cut_list
       
+      def players_cut(self):
+        if getUseAlist():
+          return any(i.isAlist for i in self.cut_list)
+        else:
+          return len(self.cut_list) > 0
+        
       def __str__(self):
         return 'gameon=%s,numplayers=%d,play_list=%d,cut_list=%d'%(str(self.gameon),self.numplayers,len(play_list), len(cut_list))
         
@@ -869,7 +875,7 @@ def checkNoPlayers():
 
 def savePlayerStatus(gamestat):
   '''Update everyone who signed-up's status'''
-  if len(gamestat.cut_list):
+  if gamestat.players_cut():
     overflow = True
   else:
     overflow = False
