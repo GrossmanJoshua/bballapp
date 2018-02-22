@@ -375,7 +375,7 @@ class RemoveName(webapp2.RequestHandler):
     def get(self):
 
 
-        if bballdb.isEmailSent():
+        if bballdb.isSignupOpen():
             #logging.info(repr(self.request.headers['Cookie']))
             try:
               defaultUserName = self.request.cookies['emailAddress']
