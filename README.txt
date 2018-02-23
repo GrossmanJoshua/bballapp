@@ -17,7 +17,7 @@ https://developers.google.com/appengine/docs/whatisgoogleappengine
 
 Web page app console: (must be signed in)
 
-https://appengine.google.com/
+https://console.cloud.google.com/appengine
 
 If the app is maintained from behind a firewall you may need the following the procedures below to
 enable the devel framework to communicate with google app engine system:
