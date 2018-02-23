@@ -5,16 +5,16 @@ html {
     background:#EEEEEE;
 }
 body{
-min-width:298px;
-max-width:640px;
-font-family: varela,"century gothic",helvetica,arial,sans-serif;
-/*font-family:Helvetica Neue,Helvetica,Calibri,Verdana,Arial,Liberation Sans,DejaVu Sans,sans-serif;*/
-font-size:80%;
-background:white;
-padding:3px;
-/*border-style:solid;
-border-width:1px;
-margin:0px;*/
+  min-width:298px;
+  max-width:640px;
+  font-family: varela,"century gothic",helvetica,arial,sans-serif;
+  /*font-family:Helvetica Neue,Helvetica,Calibri,Verdana,Arial,Liberation Sans,DejaVu Sans,sans-serif;*/
+  font-size:80%;
+  background:white;
+  padding:3px;
+  /*border-style:solid;
+  border-width:1px;
+  margin:0px;*/
 }
 body.wide {
   max-width: 1280px;
@@ -32,56 +32,17 @@ body.wide {
   padding-bottom:1em;
 }
 a {
-  color:#FF6C00;
-  text-decoration:none;
+  color: #057281;
+  text-decoration: none;
 }
 a:hover {
   color:#FF6C00;
   text-decoration:underline;
 }
 
-.a_button {
-  font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
-	-moz-box-shadow:inset 0px 1px 0px 0px #fed897;
-	-webkit-box-shadow:inset 0px 1px 0px 0px #fed897;
-	box-shadow:inset 0px 1px 0px 0px #fed897;
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f6b33d), color-stop(1, #d29105) );
-	background:-moz-linear-gradient( center top, #f6b33d 5%, #d29105 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f6b33d', endColorstr='#d29105');
-	background-color:#f6b33d;
-	-webkit-border-top-left-radius:0px;
-	-moz-border-radius-topleft:0px;
-	border-top-left-radius:0px;
-	-webkit-border-top-right-radius:0px;
-	-moz-border-radius-topright:0px;
-	border-top-right-radius:0px;
-	-webkit-border-bottom-right-radius:0px;
-	-moz-border-radius-bottomright:0px;
-	border-bottom-right-radius:0px;
-	-webkit-border-bottom-left-radius:0px;
-	-moz-border-radius-bottomleft:0px;
-	border-bottom-left-radius:0px;
-	text-indent:0;
-	border:1px solid #eda933;
-	display:inline-block;
-	color:#ffffff;
-	font-size:20px;
-/*	font-size:15px;*/
-	font-weight:bold;
-	font-style:normal;
-	text-decoration:none;
-	text-align:center;
-	text-shadow:1px 1px 0px #cd8a15;
-  padding:0.1em;
-  margin-left:2em;
-  vertical-align:middle;
+/* A list highligher color */
+.alist { color:#158493; font-weight:bold; }
 
-  /*word-break: break-all;*/
-  /*white-space: nowrap;*/
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height:2em;
-}
 td .a_button{
  width:100%;
  margin:0px;
@@ -89,75 +50,125 @@ td .a_button{
      -moz-box-sizing: border-box;
           box-sizing: border-box;
 }
+
 .full_height {
  height:100%;
 }
 
+th.widen, td.widen {
+  width: 99%;
+}
+
+/* The roster box */
+.rosterbox {
+  font-family: varela,"century gothic",helvetica,arial,sans-serif;
+  /*font-family:Helvetica Neue,Helvetica,Calibri,Verdana,Arial,Liberation Sans,DejaVu Sans,sans-serif;*//*Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;*/
+  /*width:600px;*/
+  text-align:center;
+  text-indent:0px;
+  border-style:solid;
+  border-color:#FFF0CF;
+  /*border-color:#999999;*/
+  border-width:1px;
+  margin:10px;
+  /*border-left-width:0px;
+  border-right-width:0px;*/
+  /*background-color:#EEEEEE;*/
+  background-color:white;
+  /*background-color:#FFE573;*/
+  padding: 10px;
+  -moz-box-shadow: 3px 3px 4px #CCC;
+  -webkit-box-shadow: 3px 3px 4px #CCC;
+  box-shadow: 3px 3px 4px #CCC;
+
+  /* Don't overflow or wrap */
+  /*word-break: break-all;*/
+  white-space: nowrap;
+  overflow-y: scroll;
+  text-overflow: ellipsis;
+}
+
+/* Playerlist formatting */
 table.playerlist {
   border-collapse: collapse;
 }
 
 table.playerlist td, table.playerlist th {
-  border: 1px solid #AB7500;
+  border: 1px solid #E5F0F2;
   padding: 2px 8px 2px 8px;
   margin: 0px;
   white-space: nowrap;
   text-align: center;
 }
 
+table.playerlist th {
+    background-color: #F7E6C2;
+    color: #505050;
+}
+
+/* Shrink the player list font */
 table#player_list_table td {
   font-size: 10pt;
 }
 
+/* Alternate rows in the player list */
+table#player_list_table tr:nth-child(even) td {
+    background-color: #F8FBFB;
+}
+
+/* Special cell types for player lists */
 table.playerlist tr.alist td {
 /*  background-color: LightYellow;*/
 }
-
 table.playerlist tr.its_me td {
   background-color: #FFF69A;
 }
-
 table.playerlist tr.safe td {
 /*  background-color: #D3FBD3;*/
 }
-
 table.playerlist tr.notsafe td {
   background-color: #FAD8DE;
 }
-
 /*table.playerlist tr.blist td {
   background-color: #FAD8DE;
-}
-*/
+}*/
 table.playerlist tr.notsafe.its_me td {
   background-color: #F38D9F;
 }
-
 /*table.playerlist tr.blist.its_me td {
   background-color: #F38D9F;
-}
-*/
-th.widen, td.widen {
-  width: 99%;
-}
+}*/
 
-table.playerlist th {
-  background-color: #d29105;
-  color: white;
+/* Buttons */
+.a_button {
+    font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
+    background-color: #FFF0CF;
+    text-indent: 0;
+    display: inline-block;
+    color: #505050;
+    font-size: 20px;
+    font-weight: bold;
+    font-style: normal;
+    text-decoration: none;
+    text-align: center;
+    padding: 5px;
+    margin-left: 2em;
+    vertical-align: middle;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: 2em;
 }
-
 .a_button:hover {
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #d29105), color-stop(1, #f6b33d) );
-	background:-moz-linear-gradient( center top, #d29105 5%, #f6b33d 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#d29105', endColorstr='#f6b33d');
-	background-color:#d29105;
-  color:#ffffff;
+  background-color: #FFE5AC;
+  color: #015763;
+  text-decoration: none;
 }
 .a_button:active {
-	position:relative;
-	top:1px;
+  position:relative;
+  top:1px;
 }
 
+/* Headings */
 h1 {
   font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
   text-align:center; 
@@ -168,6 +179,8 @@ h2 {
   text-align:center; 
   padding:10px;
 }
+
+/* Misc. Check for removal */
 #forecast_embed {
   width:100%;
   border-top-style:solid;
@@ -200,35 +213,7 @@ pre {
   -webkit-box-shadow: 3px 3px 4px #CCC;
   box-shadow: 3px 3px 4px #CCC;
 }
-.alist { color:#016B7A; font-weight:bold; }
 
-.rosterbox {
-  font-family: varela,"century gothic",helvetica,arial,sans-serif;
-  /*font-family:Helvetica Neue,Helvetica,Calibri,Verdana,Arial,Liberation Sans,DejaVu Sans,sans-serif;*//*Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;*/
-  /*width:600px;*/
-  text-align:center;
-  text-indent:0px;
-  border-style:solid;
-  border-color:#AB7500;
-  /*border-color:#999999;*/
-  border-width:1px;
-  margin:10px;
-  /*border-left-width:0px;
-  border-right-width:0px;*/
-  /*background-color:#EEEEEE;*/
-  background-color:white;
-  /*background-color:#FFE573;*/
-  padding: 10px;
-  -moz-box-shadow: 3px 3px 4px #CCC;
-  -webkit-box-shadow: 3px 3px 4px #CCC;
-  box-shadow: 3px 3px 4px #CCC;
-
-  /* Don't overflow or wrap */
-  /*word-break: break-all;*/
-  white-space: nowrap;
-  overflow-y: scroll;
-  text-overflow: ellipsis;
-}
 #block{
   text-indent:50px;
   margin:0;
@@ -237,7 +222,7 @@ pre {
 #indented{
   text-indent:50px;
 }
-#emph {
+.emph {
   font-weight:bold;
 }
 #htd {
@@ -347,8 +332,15 @@ p#status {
   .desk25mobile50{
     width:50%;
   }
-  .rosterbox td, .rosterbox th{
-    font-size:70%;
+  h1 { font-size: 4vw; }
+
+  .rosterbox td, .rosterbox th {
+    font-size: 3vw;
+    overflow: hidden;
+    white-space: normal;
+    max-width: 20vw;
+    /*font-size:70%;*/
+    text-overflow: ellipsis;
   }
   #indented{
     text-indent:25px;
@@ -384,8 +376,14 @@ p#status {
   .desk25mobile50{
     width:50%;
   }
-  .rosterbox td, .rosterbox th{
-    font-size:70%;
+  h1 { font-size: 4vw; }
+  .rosterbox td, .rosterbox th {
+    font-size: 3vw;
+    overflow: hidden;
+    white-space: normal;
+    max-width: 20vw;
+    /*font-size:70%;*/
+    text-overflow: ellipsis;
   }
   #indented{
     text-indent:10px;
