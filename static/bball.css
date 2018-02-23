@@ -116,24 +116,28 @@ table#player_list_table tr:nth-child(even) td {
     background-color: #F8FBFB;
 }
 
+table.playerlist tr:hover {
+    background-color: #FFF0CF;
+}
+
 /* Special cell types for player lists */
 table.playerlist tr.alist td {
 /*  background-color: LightYellow;*/
 }
 table.playerlist tr.its_me td {
-  background-color: #FFF69A;
+  background-color: #F5D898;
 }
 table.playerlist tr.safe td {
 /*  background-color: #D3FBD3;*/
 }
 table.playerlist tr.notsafe td {
-  background-color: #FAD8DE;
+  background-color: #FFEBE9;
 }
 /*table.playerlist tr.blist td {
   background-color: #FAD8DE;
 }*/
 table.playerlist tr.notsafe.its_me td {
-  background-color: #F38D9F;
+  background-color: #FFD2CF;
 }
 /*table.playerlist tr.blist.its_me td {
   background-color: #F38D9F;
