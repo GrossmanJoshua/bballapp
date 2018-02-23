@@ -48,4 +48,8 @@ enable the devel framework to communicate with google app engine system:
 
 5)dev_appserver.py bballapp (to test)
 
+You can go to http://localhost:8000/ for the admin page.
+
+You can login at http://localhost:8080/_ah/login
+
 NOTE: you may need to run appcfg.py update <app directory> before step 3, if never run before....
