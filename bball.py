@@ -98,13 +98,13 @@ class PlayersListPage(webapp2.RequestHandler):
          <tr>
          <th></th>
          <th></th>
-         <th colspan="3">Signups</th>
+         <th colspan="4">Signups</th>
          <th colspan="5">Games Played</th>
          <th colspan="2">Missed Cut</th>
          <tr>
          <th class="widen">Email</th>
          <th>Priority</th>
-         <th>Total</th><th>Last</th><th>Avg Signup Time</th>
+         <th>Total</th><th>Last</th><th>Avg Signup Time</th><th>Early</th>
          <th>Total</th><th>M</th><th>W</th><th>F</th><th>Last</th>
          <th>Total</th><th>Last</th>
        </thead><tbody>
@@ -132,7 +132,7 @@ class PlayersListPage(webapp2.RequestHandler):
       for player in sorted(players, key=lambda i: i.email):
         self.response.out.write('''
         <tr><td>{email}</td><td>{prio}</td>
-        <td>{sups}</td><td>{lastsup}</td><td>{suptime}</td>
+        <td>{sups}</td><td>{lastsup}</td><td>{suptime}</td><td>{early}</td>
         <td>{totp}</td><td>{m}</td><td>{w}</td><td>{f}</td><td>{lastp}</td>
         <td>{cut}</td><td>{lastcut}</td></tr>
         '''.format(
@@ -140,6 +140,7 @@ class PlayersListPage(webapp2.RequestHandler):
           sups=player.numSignups,
           lastsup=player.lastSignup,
           suptime=player.signup_time(),
+          early=player.numEarlySignups,
           totp=player.gamesPlayed,
           m=player.gamesPlayedM,
           w=player.gamesPlayedW,
