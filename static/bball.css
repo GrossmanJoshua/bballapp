@@ -200,7 +200,7 @@ pre {
   -webkit-box-shadow: 3px 3px 4px #CCC;
   box-shadow: 3px 3px 4px #CCC;
 }
-.alist { color:#025C69; font-weight:bold; }
+.alist { color:#016B7A; font-weight:bold; }
 
 .rosterbox {
   font-family: varela,"century gothic",helvetica,arial,sans-serif;
@@ -226,7 +226,7 @@ pre {
   /* Don't overflow or wrap */
   /*word-break: break-all;*/
   white-space: nowrap;
-  overflow: hidden;
+  overflow-y: scroll;
   text-overflow: ellipsis;
 }
 #block{
@@ -347,8 +347,8 @@ p#status {
   .desk25mobile50{
     width:50%;
   }
-  #rosterbox{
-    font-size:90%;
+  .rosterbox td, .rosterbox th{
+    font-size:70%;
   }
   #indented{
     text-indent:25px;
@@ -384,8 +384,8 @@ p#status {
   .desk25mobile50{
     width:50%;
   }
-  #rosterbox{
-    font-size:100%;
+  .rosterbox td, .rosterbox th{
+    font-size:70%;
   }
   #indented{
     text-indent:10px;
