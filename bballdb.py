@@ -160,8 +160,7 @@ def today():
    
 def get_game_props(weekday=None):
   '''Return a GameProperties object for the current day of the week'''
-  q = GameProperties.query(ancestor = ndb.Key('GameStatus','Bball'),
-                              default_options = ndb.QueryOptions(keys_only = True))
+  q = GameProperties.query(default_options = ndb.QueryOptions(keys_only = True))
                               
   if weekday is None:
     weekday = today().weekday()
@@ -180,7 +179,6 @@ def get_game_props(weekday=None):
   logging.info('no properties for today, initializing to default')
 
   day = GameProperties(
-    parent = ndb.Key('GameStatus','Bball'),
     weekDay = weekday,
     minNumPlayers = 8,
     maxNumPlayers = 12,
