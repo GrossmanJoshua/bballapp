@@ -123,6 +123,7 @@ class Player(ndb.Model):
     preference = ndb.IntegerProperty(required=True)
     timestamp = ndb.DateTimeProperty(auto_now_add=True)
     earlySignup = ndb.BooleanProperty(required=True)
+    earlySignupTime = ndb.DateTimeProperty(required=False)
     priorityScore = ndb.IntegerProperty(required=False)
     isAlist = ndb.BooleanProperty(required=True)
 
@@ -152,7 +153,9 @@ class PlayerStatus(ndb.Model):
     
     def signup_time(self):
       '''signup time as a string'''
-      return "{:2d}:{:02d}".format(int(self.averageSignupTime//60 + 7), int(self.averageSignupTime)%60)
+      hour = (int(self.averageSignupTime//60 + 7) + 24) % 24
+      minute = int(self.averageSignupTime)%60
+      return "{:2d}:{:02d}".format(hour, minute)
     
 def today():
   '''Return the day of the week in EST'''
@@ -194,12 +197,13 @@ def get_game_props(weekday=None):
   return day
   
 # Update the player status
-def updatePlayerStatus(person, playing, early_signup, signup_timestamp, overflow):
+def updatePlayerStatus(signup_player, playing, overflow):
     '''Given an email/name, find an entry in the PlayerStatus database and update it'''
     q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
                               default_options = ndb.QueryOptions(keys_only = True))
+
     # Sanitize
-    name, email = emailParser(person)
+    name, email = emailParser(signup_player.name)
     
     if (email == None):
       return False, None
@@ -226,7 +230,7 @@ def updatePlayerStatus(person, playing, early_signup, signup_timestamp, overflow
                       priorityScore = 0,
                       isAlist = False)
 
-      update_player_status(player, playing, early_signup, signup_timestamp, overflow)
+      update_player_status(player, signup_player, playing, overflow)
       player.put()
     else:
       for playerKey in playerKeys:
@@ -235,14 +239,24 @@ def updatePlayerStatus(person, playing, early_signup, signup_timestamp, overflow
           except BadValueError:
             continue
             
-          update_player_status(player, playing, early_signup, signup_timestamp, overflow)
+          update_player_status(player, signup_player, playing, overflow)
           player.put()
           break
           
-def update_player_status(player, playing, early_signup, signup_timestamp, overflow):
+def update_player_status(player, signup_player, playing, overflow):
   '''Update a players status data'''
+  
+  early_signup = signup_player.earlySignup
+  if early_signup:
+    signup_timestamp = signup_player.earlySignupTime
+  else:
+    signup_timestamp = signup_player.timestamp
+    
   ts = signup_timestamp + Eastern_tzinfo().utcoffset(signup_timestamp)
-  minutes_7am = (ts.hour - 7) * 60 + ts.minute
+  hour = ts.hour
+  if hour >= 11:
+    hour -= 24
+  minutes_7am = (hour - 7) * 60 + ts.minute
     
   player.lastSignup = today()
   player.numSignups += 1
@@ -767,6 +781,7 @@ def finalizeEarlyRoster():
     et = Eastern_tzinfo().utcoffset(ts)
     
     for player in players:
+      player.earlySignupTime = player.timestamp
       offset = random.randint(RANDOM_MINUTES_START*60, RANDOM_MINUTES_END*60) # Pick a random integer in the N minute range
       player.timestamp = ts + timedelta(seconds=offset) - et
       player.put() # add it back to the dB with the alternate timestamp
@@ -851,8 +866,8 @@ def checkNoPlayers():
         self.play_list = play_list
         self.cut_list = cut_list
       
-      def players_cut(self):
-        if getUseAlist():
+      def overflow(self, isAlist):
+        if getUseAlist() and isAlist:
           return any(i.isAlist for i in self.cut_list)
         else:
           return len(self.cut_list) > 0
@@ -884,16 +899,13 @@ def checkNoPlayers():
 
 def savePlayerStatus(gamestat):
   '''Update everyone who signed-up's status'''
-  if gamestat.players_cut():
-    overflow = True
-  else:
-    overflow = False
-    
   for player in gamestat.play_list:
-    updatePlayerStatus(player.name, True, player.earlySignup, player.timestamp, overflow)
+    overflow = gamestat.overflow(player.isAlist)
+    updatePlayerStatus(player, True, overflow)
     
   for player in gamestat.cut_list:
-    updatePlayerStatus(player.name, False, player.earlySignup, player.timestamp, overflow)
+    overflow = gamestat.overflow(player.isAlist)
+    updatePlayerStatus(player, False, overflow)
     
 def postRoster(test):
     if isEmailSent():

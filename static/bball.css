@@ -150,6 +150,12 @@ table.playerlist tr.notsafe.its_me td {
 }*/
 
 /* Buttons */
+td.td_button {
+  padding: 10px 8px 8px 0px;
+  border:none collapse;
+  margin:2px;
+/*  height:3em;*/
+}
 .a_button {
     font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
     background-color: #FFE5AC; /*FFF0CF;*/
@@ -168,7 +174,7 @@ table.playerlist tr.notsafe.its_me td {
     vertical-align: middle;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-height: 2em;
+/*    max-height: 2em;*/
 }
 .a_button:hover {
   background-color: #FAC34C;
@@ -236,12 +242,6 @@ pre {
 }
 .emph {
   font-weight:bold;
-}
-td.td_button {
-  padding:0px;
-  border:none collapse;
-  margin:0px;
-  height:3em;
 }
 
 input, select, textarea, button{
