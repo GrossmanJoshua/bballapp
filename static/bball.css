@@ -41,7 +41,7 @@ a:hover {
 }
 
 /* A list highligher color */
-.alist { color:#158493; font-weight:bold; }
+.alist { color:#076977; font-weight:bold; }
 
 td .a_button{
  width:100%;
@@ -84,7 +84,7 @@ th.widen, td.widen {
   /* Don't overflow or wrap */
   /*word-break: break-all;*/
   white-space: nowrap;
-  overflow-y: scroll;
+  overflow-x: auto;
   text-overflow: ellipsis;
 }
 
@@ -94,7 +94,7 @@ table.playerlist {
 }
 
 table.playerlist td, table.playerlist th {
-  border: 1px solid #E5F0F2;
+  border: 1px solid #A0A0A0;
   padding: 2px 8px 2px 8px;
   margin: 0px;
   white-space: nowrap;
@@ -113,11 +113,17 @@ table#player_list_table td {
 
 /* Alternate rows in the player list */
 table#player_list_table tr:nth-child(even) td {
-    background-color: #F8FBFB;
+    background-color: #B7E5EC;
 }
+
+table#player_list_table tr:nth-child(even):hover td {
+    background-color: #FFF0CF;
+}
+
 
 table.playerlist tr:hover {
     background-color: #FFF0CF;
+    cursor: default;
 }
 
 /* Special cell types for player lists */
@@ -146,7 +152,9 @@ table.playerlist tr.notsafe.its_me td {
 /* Buttons */
 .a_button {
     font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
-    background-color: #FFF0CF;
+    background-color: #FFE5AC; /*FFF0CF;*/
+    border: 1px solid #FDC54C;
+    border-radius: 6px;
     text-indent: 0;
     display: inline-block;
     color: #505050;
@@ -163,7 +171,7 @@ table.playerlist tr.notsafe.its_me td {
     max-height: 2em;
 }
 .a_button:hover {
-  background-color: #FFE5AC;
+  background-color: #FAC34C;
   color: #015763;
   text-decoration: none;
 }
@@ -229,60 +237,11 @@ pre {
 .emph {
   font-weight:bold;
 }
-#htd {
-	-moz-box-shadow:inset 0px 1px 0px 0px #fed897;
-	-webkit-box-shadow:inset 0px 1px 0px 0px #fed897;
-	box-shadow:inset 0px 1px 0px 0px #fed897;
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #f6b33d), color-stop(1, #d29105) );
-	background:-moz-linear-gradient( center top, #f6b33d 5%, #d29105 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#f6b33d', endColorstr='#d29105');
-	background-color:#f6b33d;
-	-webkit-border-top-left-radius:0px;
-	-moz-border-radius-topleft:0px;
-	border-top-left-radius:0px;
-	-webkit-border-top-right-radius:0px;
-	-moz-border-radius-topright:0px;
-	border-top-right-radius:0px;
-	-webkit-border-bottom-right-radius:0px;
-	-moz-border-radius-bottomright:0px;
-	border-bottom-right-radius:0px;
-	-webkit-border-bottom-left-radius:0px;
-	-moz-border-radius-bottomleft:0px;
-	border-bottom-left-radius:0px;
-	text-indent:0;
-	border:1px solid #eda933;
-	display:inline-block;
-	color:#ffffff;
-	font-size:15px;
-	font-weight:bold;
-	font-style:normal;
-	text-decoration:none;
-	text-align:center;
-	text-shadow:1px 1px 0px #cd8a15;
-  padding:4px;
-}
 td.td_button {
   padding:0px;
   border:none collapse;
   margin:0px;
   height:3em;
-}
-
-/*#htd:hover {
-	background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #d29105), color-stop(1, #f6b33d) );
-	background:-moz-linear-gradient( center top, #d29105 5%, #f6b33d 100% );
-	filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#d29105', endColorstr='#f6b33d');
-	background-color:#d29105;
-  color:#ffffff;
-  text-decoration:none;
-}*/
-td#htd a {
-  color:white;
-  text-decoration:underline;
-}
-td#htd a:hover {
-  color:white;
-  text-decoration:none;
 }
 
 input, select, textarea, button{
@@ -318,6 +277,13 @@ p#status {
   width:25%;
 }
 
+.content_desktop {
+  display: inline;
+}
+.content_mobile {
+  display: none;
+}
+
 @media screen and (max-width: 960px) and (max-device-width : 480px){
   .a_button {
     font-size:95%;
@@ -325,7 +291,7 @@ p#status {
     padding:3px; */
   }
   body{
-    font-size:100%;
+    font-size:3vw;
   }
   pre{
     font-size:90%;
@@ -354,12 +320,19 @@ p#status {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  #htd {
+/*  #htd {
     font-size:95%;
-  }
+  }*/
   #block{
     text-indent:25px;
   }
+  .content_desktop {
+    display: none;
+  }
+  .content_mobile {
+    display: inline;
+  }
+
 }
 
 @media screen and (max-width: 640px) and (max-device-width : 480px){
@@ -369,7 +342,7 @@ p#status {
     padding:3px;
   }*/
   body{
-    font-size:100%;
+    font-size:3vw;
   }
   pre{
     font-size:100%;
@@ -397,10 +370,16 @@ p#status {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  #htd {
+/*  #htd {
     font-size:110%;
-  }
+  }*/
   #block{
     text-indent:10px;
+  }
+  .content_desktop {
+    display: none;
+  }
+  .content_mobile {
+    display: inline;
   }
 }

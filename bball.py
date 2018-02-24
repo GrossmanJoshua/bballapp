@@ -92,7 +92,7 @@ class PlayersListPage(webapp2.RequestHandler):
        <meta name="viewport" content="width=640"/>
        </head>
        <body class="wide">
-       <div id="rosterbox">
+       <div class="rosterbox">
        <table class="playerlist" id="player_list_table">
        <thead>
          <tr>
@@ -162,7 +162,7 @@ class AlistPage(webapp2.RequestHandler):
                </head>
                <body>
                <h1>"A" list</h1>
-               <div id="rosterbox">
+               <div class="rosterbox">
                ''')
       alist_list = []
       with open(ALIST_FILE, 'r') as alist:
@@ -184,7 +184,7 @@ class BlistPage(webapp2.RequestHandler):
                </head>
                <body>
                <h1>"B" list</h1>
-               <div id="rosterbox">
+               <div class="rosterbox">
                ''')
       blist_list = []
       with open(BLIST_FILE, 'r') as blist:
@@ -202,25 +202,30 @@ def getRosterStr(current_user=None):
     retstr = '''
           <h1>Signup Roster</h1>
           <p style="text-align:center">%(time)s</p>
-          <p id="emph" style="text-align:center">The following %(nump)d player%(s)s are currently signed up</p>
+          <p class="emph" style="text-align:center">The following %(nump)d player%(s)s currently signed up</p>
           <div class="rosterbox">%(roster)s</div>
-          <p><span class="alist">Highlighted players</span> are on the "A-list" and will not be bumped by players who are not on the A-list. You
+          <p class="content_desktop"><span class="alist">Highlighted players</span> are on the "A-list" and will not be bumped by players who are not on the A-list. You
           may be bumped for up to 1 hour after your signup if another player with higher priority signs up (a player gets higher priority if
           they have been recently cut from games due to too many players). A name will be shaded <span style="color:#FC002D">red</span>,
           until that happens. Non-A-list players will be cut from the team from the bottom of this list
           up as "A-list" players sign-up. An asterisk denotes a player who used early signup.</p>
+          <p class="content_mobile"><span class="alist">Highlighted players</span> are on the "A-list". A name shaded 
+          <span style="color:#FC002D">red</span> can be bumped by a player with higher priority. This lasts
+          until an hour after signup.</p>
           ''' % {
             'time':cgi.escape(bballdb.getGameDateTime()),
             'nump':len(roster.roster_list),
-            's':'s' if len(roster.roster_list)>1 else '',
+            's':'s are' if len(roster.roster_list)>1 else ' is',
             'roster':roster.roster_list_html
           }
     if roster.alt_roster_list:
         retstr += '''
           <h2>Currently missing the cut</h2>
-          <p>The following %(nump)d player%(s)s signed up but aren't in the final game
+          <p class="content_desktop">The following %(nump)d player%(s)s signed up but aren't in the final game
           at this time. If someone on the game roster (above) drops out, the first person from this list will be added
           to the game. After the final roster goes out, if you are on the game roster but for any reason can't make the game, please offer your spot to these players.</p>
+          <p class="content_mobile emph">The following %(nump)d player%(s)s have missed the cut
+          at this time:</p>
           <div class="rosterbox">%(roster)s</div>
           ''' % {
             'nump':len(roster.alt_roster_list),
@@ -420,7 +425,7 @@ class RemoveName(webapp2.RequestHandler):
               </head>
               <body><p id="status">You have been removed from the game</p>
               <h1>Signup Roster</h1>
-              <div id="rosterbox">%(roster)s</div>
+              <div class="rosterbox">%(roster)s</div>
               <table style="width:100%%"><tr>
               <td class="td_button" style="width:50%%;"><a class="a_button full_height" href="/roster">Roster</a></td>
               <td class="td_button" style="width:50%%;"><a class="a_button full_height" href="/">Home Page</a></td>
@@ -474,7 +479,7 @@ class AddSubscriber(webapp2.RequestHandler):
               %(head)s
               </head>
               <body><p id="status">%s</p>
-              <div id="rosterbox">%s</div>
+              <div class="rosterbox">%s</div>
               </body>
             </html>''' % (title, htmlHead(), content, "\n".join([cgi.escape(x) for x in bballdb.getAllSubscribers()])))
 
@@ -531,8 +536,8 @@ class Roster(webapp2.RequestHandler):
               return '''
               <h1>No Game Today</h1>
               <p style="text-align:center">%(time)s</p>
-              <p id="emph" style="text-align:center">Only %(nump)d player%(s)s signed up</p>
-              <div id="rosterbox">%(roster)s</div>
+              <p class="emph" style="text-align:center">Only %(nump)d player%(s)s signed up</p>
+              <div class="rosterbox">%(roster)s</div>
               ''' % {
                 'time':gametime, 
                 'nump':gamestat.numplayers,
@@ -543,8 +548,8 @@ class Roster(webapp2.RequestHandler):
           retstr = '''
             <h1>Final Game Roster - Game On!</h1>
             <p style="text-align:center">%(time)s</p>
-            <p id="emph" style="text-align:center">%(nump)d players - game at noon</p>
-            <div id="rosterbox">%(roster)s</div>
+            <p class="emph" style="text-align:center">%(nump)d players - game at noon</p>
+            <div class="rosterbox">%(roster)s</div>
             ''' % {
               'time':gametime, 
               'nump':len(roster.roster_list),
@@ -556,7 +561,7 @@ class Roster(webapp2.RequestHandler):
               <p>The following %(nump)d player%(s)s signed up but didn't make the final game.
               If you are on the game roster (above) and for any reason can't make the game, please offer your spot to these
               players.</p>
-              <div id="rosterbox">%(roster)s</div>
+              <div class="rosterbox">%(roster)s</div>
               ''' % {
                 'nump':len(roster.alt_roster_list),
                 's':'s' if len(roster.alt_roster_list)>1 else '',
