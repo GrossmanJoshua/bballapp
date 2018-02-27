@@ -13,7 +13,7 @@ cron:
 
 - description: daily summary job  
   url: /control?function=startEarlyRoster
-  schedule: every sun,mon,tue,wed,thu 18:00
+  schedule: every sun,tue,thu 18:00
   timezone: US/Eastern
 
 - description: daily summary job  
