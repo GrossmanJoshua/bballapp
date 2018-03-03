@@ -12,6 +12,7 @@ import logging
 import bballdb
 import webapp2
 import bballoutmail
+import string
 from datetime import datetime
 from bballconfig import *
 
@@ -61,18 +62,18 @@ class DirectionsPage(webapp2.RequestHandler):
         <body>
         ''')
         if bballdb.getUseAlist():
-            self.response.out.write('''<p id="block">Hunt Recreation Center</p>
-                <a href="https://goo.gl/maps/tN72M" target="_blank"><p id="block">90 Stow St</p>
-                <p id="block">Concord, MA 01742</p></a>
+            self.response.out.write('''<p class="block">Hunt Recreation Center</p>
+                <a href="https://goo.gl/maps/tN72M" target="_blank"><p class="block">90 Stow St</p>
+                <p class="block">Concord, MA 01742</p></a>
 
                 <p></p>
 
                 <iframe class="optional_mobile" src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d2943.632630738138!2d-71.350981!3d42.456832!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e39a471eb5ee4d%3A0x8d9659de078ed235!2sHunt+Recreation+Center%2C+90+Stow+St%2C+Concord%2C+MA+01742!5e0!3m2!1sen!2sus!4v1411135520200" width="95%" height="450" frameborder="0" style="border:0"></iframe>
                ''')
         else:
-            self.response.out.write('''<p id="block">Percy Rideout Playground</p>
-                <a href="http://goo.gl/maps/LH5GZ" target="_blank"><p id="block">Intersection of Laws Brook Road and Conant St</p>
-                <p id="block">West Concord, MA 01742</p></a>
+            self.response.out.write('''<p class="block">Percy Rideout Playground</p>
+                <a href="http://goo.gl/maps/LH5GZ" target="_blank"><p class="block">Intersection of Laws Brook Road and Conant St</p>
+                <p class="block">West Concord, MA 01742</p></a>
  
                 <p>Courts are on the Laws Brook Road side of the park.</p>
 
@@ -150,7 +151,8 @@ class PlayersListPage(webapp2.RequestHandler):
           lastcut=player.lastCut,
           prio=player.priorityScore
         ))
-      self.response.out.write('''</tbody></table></div></body></html>\n''')
+      self.response.out.write('''</tbody></table></div>
+      <p class="block"><a href="/graphs">[Graphs]</a></p></body></html>\n''')
 
 class AlistPage(webapp2.RequestHandler):
     def get(self):
@@ -318,15 +320,15 @@ class AddName(webapp2.RequestHandler):
               </head>
               <body>
               <!--
-              <p id="status">You could not be added to the roster because your email
+              <p class="status">You could not be added to the roster because your email
               address is not known to the system.</p>
               <p>Please send an email with the word "subscribe" in the subject from your
               email account to the following address:</p>
-              <p id="indented"><a href="mailto:%(email)s?subject=subscribe">%(emailesc)s</a></p>
+              <p class="indented"><a href="mailto:%(email)s?subject=subscribe">%(emailesc)s</a></p>
               <p>After you have recieved confirmation, sign up again with the same address you
               sent the email from, and you should be fine.</p>
               -->
-              <p id="status">You could not be added to the roster because your email address is invalid.</p>
+              <p class="status">You could not be added to the roster because your email address is invalid.</p>
               <p>Back to the <a href="/">%(title)s Basketball home page</a></p>
               </body>
             </html>''' % {'title':PAGE_TITLE, 'email':ADMIN_EMAIL,'emailesc':cgi.escape(ADMIN_EMAIL), 'head':htmlHead()})
@@ -337,7 +339,7 @@ class AddName(webapp2.RequestHandler):
               <head><title>Error! Sign-up</title>
               %(head)s
               </head>
-              <body><p id="status">You could not be added to the roster: %(details)s</p>
+              <body><p class="status">You could not be added to the roster: %(details)s</p>
               <p>Back to the <a href="/">%(title)s Basketball home page</a></p>
               </body>
             </html>''' % {'title':PAGE_TITLE,'details':str(e), 'head':htmlHead()})
@@ -354,9 +356,9 @@ class AddName(webapp2.RequestHandler):
         # roster = bballdb.currentRoster()
         # matches_email = [x for x in roster.roster_list if x.name == newPlayer.full_email]
         # if matches_email or bballdb.isEarlySignup():
-        #   tag = '<p id="status">You have been added to the roster as "%(player)s"</p>' % {'player':cgi.escape(player)}
+        #   tag = '<p class="status">You have been added to the roster as "%(player)s"</p>' % {'player':cgi.escape(player)}
         # else:
-        #   tag = '<p id="status" style="background-color:red">Your name has been registered but you are not currently on the active roster because too many people have signed up before you</p>'
+        #   tag = '<p class="status" style="background-color:red">Your name has been registered but you are not currently on the active roster because too many people have signed up before you</p>'
         #
         # self.response.out.write('''
         # <html>
@@ -376,6 +378,27 @@ class AddName(webapp2.RequestHandler):
         #   </body>
         # </html>''' % {'title':PAGE_TITLE, 'tag':tag, 'roster':rosterstr, 'head':htmlHead()})
 
+class Graphs(webapp2.RequestHandler):
+  def get(self):
+    email_split = lambda x: x.split('@')[0]
+    
+    with open('graphs.html') as f:
+      data = f.read()
+      
+    templ = string.Template(data)
+
+    # players = list(sorted(bballdb.getPlayerStatus(), key=lambda x: (x.gamesPlayedM+x.gamesPlayedW+x.gamesPlayedF+x.gamesCut), reverse=True))
+    players = list(sorted(bballdb.getPlayerStatus(), key=lambda x: (x.gamesPlayed+x.gamesCut), reverse=True))
+    
+    mapping = {}
+    mapping['bar_data_m'] = '[{}]'.format(','.join(str(i.gamesPlayedM) for i in players))
+    mapping['bar_data_w'] = '[{}]'.format(','.join(str(i.gamesPlayedW) for i in players))
+    mapping['bar_data_f'] = '[{}]'.format(','.join(str(i.gamesPlayedF) for i in players))
+    mapping['bar_data_cut'] = '[{}]'.format(','.join(str(i.gamesCut) for i in players))
+    mapping['names'] = '[{}]'.format(','.join("'{}'".format(email_split(i.email)) for i in players))
+    mapping['signup_time_data'] = '[]'
+
+    self.response.out.write(templ.safe_substitute(mapping))
 
 class RemoveName(webapp2.RequestHandler):
     def get(self):
@@ -423,7 +446,7 @@ class RemoveName(webapp2.RequestHandler):
               <head><title>%(title)s Basketball Un-Sign-up</title>
               %(head)s
               </head>
-              <body><p id="status">You have been removed from the game</p>
+              <body><p class="status">You have been removed from the game</p>
               <h1>Signup Roster</h1>
               <div class="rosterbox">%(roster)s</div>
               <table style="width:100%%"><tr>
@@ -439,7 +462,7 @@ class RemoveName(webapp2.RequestHandler):
               <head><title>Error! Un-Sign-up</title>
               %(head)s
               </head>
-              <body><p id="status">You could not be removed from the game</p>
+              <body><p class="status">You could not be removed from the game</p>
               <p>Back to the <a href="/">%(title)s Basketball home page</a></p>
               </body>
             </html>'''% {'title':PAGE_TITLE, 'head':htmlHead()})
@@ -478,7 +501,7 @@ class AddSubscriber(webapp2.RequestHandler):
               <head><title>%s</title>
               %(head)s
               </head>
-              <body><p id="status">%s</p>
+              <body><p class="status">%s</p>
               <div class="rosterbox">%s</div>
               </body>
             </html>''' % (title, htmlHead(), content, "\n".join([cgi.escape(x) for x in bballdb.getAllSubscribers()])))
@@ -495,9 +518,9 @@ class RemoveSubscriber(webapp2.RequestHandler):
            </head>
            <body>''' % {'title':PAGE_TITLE, 'head':htmlHead()})
         if (status):
-          self.response.out.write('''<p id="status">%(email)s has been unsubscribed from the %(title)s Basketball emails</p>'''% {'title':PAGE_TITLE,'email': email})
+          self.response.out.write('''<p class="status">%(email)s has been unsubscribed from the %(title)s Basketball emails</p>'''% {'title':PAGE_TITLE,'email': email})
         else:
-          self.response.out.write('''<p id="status">Error! could not unsubscribe %(email)s from the %(title)s Basketball emails</p>'''% {'title':PAGE_TITLE,'email': email})
+          self.response.out.write('''<p class="status">Error! could not unsubscribe %(email)s from the %(title)s Basketball emails</p>'''% {'title':PAGE_TITLE,'email': email})
         self.response.out.write('''
           </html>''')
 
@@ -708,5 +731,6 @@ app = webapp2.WSGIApplication([(r'/', MainPage),
                                (r'/startSignup',StartSignup),
                                (r'/quit',RemoveName),
                                (r'/players',PlayersListPage),
+                               (r'/graphs',Graphs),
                                (r'/subscribe',AddSubscriber),
                                (r'/unsubscribe',RemoveSubscriber)],debug=True)

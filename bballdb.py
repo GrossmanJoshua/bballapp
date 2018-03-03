@@ -11,14 +11,6 @@ from datetime import datetime, timedelta, date, time
 import random
 from bballconfig import *
 
-# OPEN_START_HOUR = 18      # Start time of the open period the day before
-# OPEN_END_HOUR = 17        # Time the list is posted
-
-# DEFAULT_GAME_DAYS = (0,2,4)       # M, W, F
-# DEFAULT_ROSTER_START_TIME = 7 # M
-# DEFAULT_ROSTER_OPEN_TIME = 4 # roster open for this many hours
-# DEFAULT_ROSTER_OPEN_HOURS = 13 # hours before start time that roster opens
-
 # The random window, right now 7:10-7:15
 RANDOM_MINUTES_START = 7 * 60 + 10
 RANDOM_MINUTES_END = RANDOM_MINUTES_START + 5
@@ -36,44 +28,7 @@ def isSignupOpen():
   # Any time the game is open, it's open
   status = getGameStatus()
   return status.inSignup or status.inEarlySignup
-  # if status.inSignup:
-  #   return True
-  #
-  # # Otherwise check the time
-  # now = localTimeNow()
-  #
-  # # Load game properties
-  # if now.hour >= OPEN_END_HOUR:
-  #   weekday = (now.weekday() + 1) % 7 # pick tomorrow's time
-  # else:
-  #   weekday = now.weekday()
-  # props = get_game_props(weekday)
-  #
-  # # Today is not a game day
-  # if not props.isGameDay:
-  #   return False
-  #
-  # now_offset = now + timedelta(hours=props.openRosterHoursPrior)
-  #
-  # print now.hour, weekday, props.isGameDay, OPEN_END_HOUR, now_offset.hour, props.rosterOpenTime
-  #
-  # # Check if we're in the open window
-  # if ((now_offset.hour >= props.rosterStartTime) and
-  #      (now_offset.hour < props.rosterStartTime + props.rosterOpenTime)):
-  #   return True
-  # else:
-  #   return False
-    
-  # # If it's a game day and we're before the signup list
-  # if now.hour < OPEN_END_HOUR and now.weekday() in GAME_DAYS:
-  #   return True
-  #
-  # # If it's the day before a game day and we're after the start time
-  # elif now.hour >= OPEN_START_HOUR and ((now.weekday()+1) % 7) in GAME_DAYS:
-  #   return True
-  # else:
-  #   return False
-  
+
             
 class InvalidEmailException(Exception):
   pass

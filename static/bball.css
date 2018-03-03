@@ -234,12 +234,12 @@ pre {
   box-shadow: 3px 3px 4px #CCC;
 }
 
-#block{
+.block{
   text-indent:50px;
   margin:0;
   padding:0;
 }
-#indented{
+.indented{
   text-indent:50px;
 }
 .emph {
@@ -255,7 +255,7 @@ input#text {
 width:98%;
 padding:1%;
 }
-p#status {
+p.status {
   background-color:#f6b33d;
   color:white;
   padding:15px;
@@ -314,7 +314,7 @@ p#status {
     /*font-size:70%;*/
     text-overflow: ellipsis;
   }
-  #indented{
+  .indented{
     text-indent:25px;
 
     /*word-break: break-all;*/
@@ -325,7 +325,7 @@ p#status {
 /*  #htd {
     font-size:95%;
   }*/
-  #block{
+  .block{
     text-indent:25px;
   }
   .content_desktop {
@@ -364,7 +364,7 @@ p#status {
     /*font-size:70%;*/
     text-overflow: ellipsis;
   }
-  #indented{
+  .indented{
     text-indent:10px;
 
     /*word-break: break-all;*/
@@ -375,7 +375,7 @@ p#status {
 /*  #htd {
     font-size:110%;
   }*/
-  #block{
+  .block{
     text-indent:10px;
   }
   .content_desktop {

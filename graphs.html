@@ -1,0 +1,144 @@
+<html>
+  <head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+  </head>
+  <body>
+    <div style="position: relative; height:90vh; width:90vw;">
+    <canvas id="myChart" style="width: 100%; height: 100%"></canvas>
+    </div>
+<script>
+
+// Chart.plugins.register({
+//   afterDatasetsDraw: function(chartInstance, easing) {
+//     // To only draw at the end of animation, check for easing === 1
+//     var ctx = chartInstance.chart.ctx;
+//     chartInstance.data.datasets.forEach(function (dataset, i) {
+//       var meta = chartInstance.getDatasetMeta(i);
+//       if (!meta.hidden) {
+//         meta.data.forEach(function(element, index) {
+//           // Draw the text in black, with the specified font
+//           ctx.fillStyle = 'rgba(30, 30, 30, 0.6)';
+//           var fontSize = 10;
+//           var fontStyle = 'normal';
+//           var fontFamily = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+//           ctx.font = Chart.helpers.fontString(fontSize, fontStyle, fontFamily);
+//           // Just naively convert to string for now
+//           // <---- ADJUST TO DESIRED TEXT --->
+//           var dataString = dataset.data[index].toString();
+//           // var dataString = dataset.data[index]["r"].toString();
+//           // Make sure alignment settings are correct
+//           // ctx.textAlign = 'center';
+//           ctx.textAlign = 'right';
+//           ctx.textBaseline = 'middle';
+//           var padding = 5;
+//           var position = element.tooltipPosition();
+//           ctx.fillText(dataString, position.x, position.y); // - (fontSize / 2) - padding);
+//         });
+//       }
+//     });
+//   }
+// });
+
+function T(h,m) {
+  if (h > 11) { return new Date(2018,1,1,h,m); }
+  else { return new Date(2018,1,2,h,m); }
+}
+
+var plot_data = ${signup_time_data};
+var bar_data_m = ${bar_data_m};
+var bar_data_w = ${bar_data_w};
+var bar_data_f = ${bar_data_f};
+var bar_data_cut = ${bar_data_cut};
+var names = ${names};
+var ctx = document.getElementById("myChart").getContext('2d');
+// var myBubbleChart = new Chart(ctx,{
+//     'type': 'bubble',
+//     'data': {
+//       "datasets":[{
+//         "label": "Signups",
+//         "data":plot_data,
+//         "backgroundColor": "rgba(99,255,75,0.5)"
+//       }]
+//     },
+//     options: {
+//         responsive: true,
+//         maintainAspectRatio: false,
+//         scales: {
+//             yAxes: [{
+//                 type: 'category',
+//                 labels: names,
+//             }],
+//             xAxes: [{
+//                 type: 'time',
+//                 time: {
+//                     unit: 'hour'
+//                 },
+//                 scaleLabel: {
+//                   labelString: 'Average Signup Time',
+//                   display: true
+//                 }
+//             }]
+//         }
+//     }
+// });
+
+var myBarChart = new Chart(ctx, {
+    type: 'horizontalBar',
+    'data': {
+      labels: names,
+      "datasets":[{
+        label: "Monday",
+        data: bar_data_m,
+        "backgroundColor": "rgba(31, 119, 180, 0.9)",
+        borderWidth: 1
+      },
+      {
+        label: "Wednesday",
+        data: bar_data_w,
+        "backgroundColor": "rgba(255, 127, 14, 0.9)",
+        borderWidth: 1
+      },
+      {
+        label: "Friday",
+        data: bar_data_f,
+        "backgroundColor": "rgba(44, 160, 44, 0.9)",
+        borderWidth: 1
+      },
+      {
+        label: "Missed the Cut",
+        data: bar_data_cut,
+        "backgroundColor": "rgba(214, 39, 40, 0.9)",
+        borderWidth: 1
+      }]
+    },
+    options: {
+        title: {
+					display: true,
+					text: 'Games By Day of the Week'
+				},
+				tooltips: {
+					mode: 'index',
+					intersect: false,
+					position: 'average'
+				},
+	      scales:{
+        yAxes: [{
+          stacked: true
+        }],
+        xAxes: [{
+          stacked: true,
+          ticks:{
+            beginAtZero: true
+          },
+          scaleLabel: {
+            labelString: 'Games Signed Up',
+            display: true
+          }
+        }]
+      }
+    }
+});
+
+</script>
+  </body>
+</html>
