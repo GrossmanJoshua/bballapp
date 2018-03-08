@@ -55,6 +55,7 @@ var bar_data_w = ${bar_data_w};
 var bar_data_f = ${bar_data_f};
 var bar_data_cut = ${bar_data_cut};
 var names = ${names};
+var bubble_names = ${bubble_names};
 
 var bubblectx = document.getElementById("myBubbleChart").getContext('2d');
 var myBubbleChart = new Chart(bubblectx,{
@@ -82,7 +83,7 @@ var myBubbleChart = new Chart(bubblectx,{
         scales: {
             yAxes: [{
                 type: 'category',
-                labels: names,
+                labels: bubble_names,
             }],
             xAxes: [{
                 type: 'time',

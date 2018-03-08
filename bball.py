@@ -399,6 +399,7 @@ class Graphs(webapp2.RequestHandler):
     
     players = list(sorted(players, key=lambda x: (x.averageSignupTime), reverse=False))
     max_games = max(i.gamesPlayed for i in players)
+    mapping['bubble_names'] = '[{}]'.format(','.join("'{}'".format(email_split(i.email)) for i in players))
     mapping['signup_time_data'] = '[{}]'.format(
       ',\n'.join('{{x:T({},{}),y:{},r:{},n:{}}}'.format(
         int(i.averageSignupTime//60 + 7),
