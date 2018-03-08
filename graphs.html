@@ -3,41 +3,46 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
   </head>
   <body>
-    <div style="position: relative; height:90vh; width:90vw;">
-    <canvas id="myChart" style="width: 100%; height: 100%"></canvas>
+    <div style="position: relative; height:80vh; width:90vw; margin-bottom:10vh">
+    <canvas id="myBarChart" style="width: 100%; height: 100%"></canvas>
+    </div>
+    <div style="position: relative; height:80vh; width:90vw; margin-bottom:10vh">
+    <canvas id="myBubbleChart" style="width: 100%; height: 100%"></canvas>
     </div>
 <script>
 
-// Chart.plugins.register({
-//   afterDatasetsDraw: function(chartInstance, easing) {
-//     // To only draw at the end of animation, check for easing === 1
-//     var ctx = chartInstance.chart.ctx;
-//     chartInstance.data.datasets.forEach(function (dataset, i) {
-//       var meta = chartInstance.getDatasetMeta(i);
-//       if (!meta.hidden) {
-//         meta.data.forEach(function(element, index) {
-//           // Draw the text in black, with the specified font
-//           ctx.fillStyle = 'rgba(30, 30, 30, 0.6)';
-//           var fontSize = 10;
-//           var fontStyle = 'normal';
-//           var fontFamily = '"Helvetica Neue", Helvetica, Arial, sans-serif';
-//           ctx.font = Chart.helpers.fontString(fontSize, fontStyle, fontFamily);
-//           // Just naively convert to string for now
-//           // <---- ADJUST TO DESIRED TEXT --->
-//           var dataString = dataset.data[index].toString();
-//           // var dataString = dataset.data[index]["r"].toString();
-//           // Make sure alignment settings are correct
-//           // ctx.textAlign = 'center';
-//           ctx.textAlign = 'right';
-//           ctx.textBaseline = 'middle';
-//           var padding = 5;
-//           var position = element.tooltipPosition();
-//           ctx.fillText(dataString, position.x, position.y); // - (fontSize / 2) - padding);
-//         });
-//       }
-//     });
-//   }
-// });
+Chart.plugins.register({
+  afterDatasetsDraw: function(chartInstance, easing) {
+    // To only draw at the end of animation, check for easing === 1
+    var ctx = chartInstance.chart.ctx;
+    if (chartInstance.config.type == 'bubble') {
+      chartInstance.data.datasets.forEach(function (dataset, i) {
+        var meta = chartInstance.getDatasetMeta(i);
+        if (!meta.hidden) {
+          meta.data.forEach(function(element, index) {
+            // Draw the text in black, with the specified font
+            ctx.fillStyle = 'rgba(30, 30, 30, 0.6)';
+            var fontSize = 10;
+            var fontStyle = 'normal';
+            var fontFamily = '"Helvetica Neue", Helvetica, Arial, sans-serif';
+            ctx.font = Chart.helpers.fontString(fontSize, fontStyle, fontFamily);
+            // Just naively convert to string for now
+            // <---- ADJUST TO DESIRED TEXT --->
+            // var dataString = dataset.data[index].toString();
+            var dataString = dataset.data[index]["n"].toString();
+            // Make sure alignment settings are correct
+            // ctx.textAlign = 'center';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            var padding = 5;
+            var position = element.tooltipPosition();
+            ctx.fillText(dataString, position.x, position.y); // - (fontSize / 2) - padding);
+          });
+        }
+      });
+    }
+  }
+});
 
 function T(h,m) {
   if (h > 11) { return new Date(2018,1,1,h,m); }
@@ -50,39 +55,51 @@ var bar_data_w = ${bar_data_w};
 var bar_data_f = ${bar_data_f};
 var bar_data_cut = ${bar_data_cut};
 var names = ${names};
-var ctx = document.getElementById("myChart").getContext('2d');
-// var myBubbleChart = new Chart(ctx,{
-//     'type': 'bubble',
-//     'data': {
-//       "datasets":[{
-//         "label": "Signups",
-//         "data":plot_data,
-//         "backgroundColor": "rgba(99,255,75,0.5)"
-//       }]
-//     },
-//     options: {
-//         responsive: true,
-//         maintainAspectRatio: false,
-//         scales: {
-//             yAxes: [{
-//                 type: 'category',
-//                 labels: names,
-//             }],
-//             xAxes: [{
-//                 type: 'time',
-//                 time: {
-//                     unit: 'hour'
-//                 },
-//                 scaleLabel: {
-//                   labelString: 'Average Signup Time',
-//                   display: true
-//                 }
-//             }]
-//         }
-//     }
-// });
 
-var myBarChart = new Chart(ctx, {
+var bubblectx = document.getElementById("myBubbleChart").getContext('2d');
+var myBubbleChart = new Chart(bubblectx,{
+    'type': 'bubble',
+    'data': {
+      "datasets":[{
+        "label": "Signups",
+        "data":plot_data,
+        "backgroundColor": "rgba(99,255,75,0.5)"
+      }]
+    },
+    options: {
+        title: {
+					display: true,
+					text: 'Average signup time (size is games played)'
+				},
+        responsive: true,
+        maintainAspectRatio: false,
+				tooltips: {
+					enabled: false,
+          mode: 'index',
+					intersect: false,
+					position: 'average'
+				},
+        scales: {
+            yAxes: [{
+                type: 'category',
+                labels: names,
+            }],
+            xAxes: [{
+                type: 'time',
+                time: {
+                    unit: 'hour'
+                },
+                scaleLabel: {
+                  labelString: 'Average Signup Time',
+                  display: true
+                }
+            }]
+        }
+    }
+});
+
+var barctx = document.getElementById("myBarChart").getContext('2d');
+var myBarChart = new Chart(barctx, {
     type: 'horizontalBar',
     'data': {
       labels: names,

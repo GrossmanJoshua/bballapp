@@ -396,7 +396,16 @@ class Graphs(webapp2.RequestHandler):
     mapping['bar_data_f'] = '[{}]'.format(','.join(str(i.gamesPlayedF) for i in players))
     mapping['bar_data_cut'] = '[{}]'.format(','.join(str(i.gamesCut) for i in players))
     mapping['names'] = '[{}]'.format(','.join("'{}'".format(email_split(i.email)) for i in players))
-    mapping['signup_time_data'] = '[]'
+    
+    players = list(sorted(players, key=lambda x: (x.averageSignupTime), reverse=False))
+    max_games = max(i.gamesPlayed for i in players)
+    mapping['signup_time_data'] = '[{}]'.format(
+      ',\n'.join('{{x:T({},{}),y:{},r:{},n:{}}}'.format(
+        int(i.averageSignupTime//60 + 7),
+        int(i.averageSignupTime%60),
+        idx, i.gamesPlayed*20./max_games,
+        i.gamesPlayed) for idx,i in enumerate(players))
+    )
 
     self.response.out.write(templ.safe_substitute(mapping))
 
