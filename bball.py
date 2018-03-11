@@ -103,7 +103,7 @@ class PlayersListPage(webapp2.RequestHandler):
          <th colspan="5">Games Played</th>
          <th colspan="2">Missed Cut</th>
          <tr>
-         <th class="widen">Email</th>
+         <th class="widen">Player</th>
          <th>Priority</th>
          <th>Total</th><th>Last</th><th>Avg Signup Time</th><th>Early</th>
          <th>Total</th><th>M</th><th>W</th><th>F</th><th>Last</th>
@@ -126,8 +126,9 @@ class PlayersListPage(webapp2.RequestHandler):
       players = bballdb.getPlayerStatus()
       
       def email_subst(email):
-        email = email.replace('@','-at-')
-        email = email.replace('.','-dot-')
+        email = email.split('@')[0]
+        #email = email.replace('@','-at-')
+        #email = email.replace('.','-dot-')
         return email
         
       for player in sorted(players, key=lambda i: i.email):
