@@ -132,13 +132,15 @@ class PlayersListPage(webapp2.RequestHandler):
         return email
         
       for player in sorted(players, key=lambda i: i.email):
+        listclass = {True: 'alist', False: 'blist'}
         self.response.out.write('''
-        <tr><td>{email}</td><td>{prio}</td>
+        <tr class="{listclass}"><td>{email}</td><td>{prio}</td>
         <td>{sups}</td><td>{lastsup}</td><td>{suptime}</td><td>{early}</td>
         <td>{totp}</td><td>{m}</td><td>{w}</td><td>{f}</td><td>{lastp}</td>
         <td>{cut}</td><td>{lastcut}</td></tr>
         '''.format(
           email=email_subst(player.email),
+          listclass=listclass[player.isAlist],
           sups=player.numSignups,
           lastsup=player.lastSignup,
           suptime=player.signup_time(),

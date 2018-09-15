@@ -23,10 +23,10 @@ ALERT_EMAIL = "Admin <jgrossman666@gmail.com>"
 #SUBSCRIBE_EMAIL = "WestConcordBallers-subscribe@yahoogroups.com"
 
 # List of "A"-list players
-ALIST_FILE = "alist.txt"
+# ALIST_FILE = "alist.txt"
 
 # List of "B"-list players
-BLIST_FILE = "blist.txt"
+# BLIST_FILE = "blist.txt"
 
 # Maximum number of players
 MAXIMUM_NUMBER_OF_PLAYERS = 12

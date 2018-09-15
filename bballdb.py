@@ -303,20 +303,30 @@ def emailParser(email):
     else:
         return (name + " <" + addr + ">", addr.lower())
     
-def _loadLineFile(file):
-    out_list = []
-    with open(file, 'r') as fh:
-      for line in fh:
-        line = line.strip()
-        if line:
-            out_list.append(line.lower())
-    return out_list
+def _loadPlayerList(isAlist=None):
+    '''isAlist=None means return all players'''
+    q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
+                              default_options = ndb.QueryOptions(keys_only = True))
+    if isAlist is None:
+        playerKeys = q
+    else:
+        playerKeys = q.filter(PlayerStatus.isAlist == isAlist)
+    emails = []
+    for player in playerKeys:
+      try:
+        player = player.get()
+      except:
+        continue
+      else:
+        if player is not None:
+            emails.append(player.email.lower())
+    return emails    
   
 def loadAList():
-    return _loadLineFile(ALIST_FILE)
+    return _loadPlayerList(isAlist=True)    
     
 def loadBList():
-    return _loadLineFile(BLIST_FILE)
+    return _loadPlayerList(isAlist=False)    
     
 def playerIsAlist(email):
     email = email.strip()

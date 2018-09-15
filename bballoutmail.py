@@ -25,6 +25,10 @@ def emailFromAdmin(recipient, sub, content, wholelist=False):
     # Only unique entries, sorted
     to = list(sorted(set([i.lower() for i in to])))
     
+    if not to:
+        logging.warning('No recipients, not sending email')
+        return
+    
     mail.send_mail(sender=ADMIN_EMAIL,
                        to=to,
                        subject=sub,

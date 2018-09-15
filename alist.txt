@@ -1,4 +1,4 @@
-chris_cotton@stratus.com chris.cotton@stratus.com
+chris.cotton@stratus.com
 gshih@qti.qualcomm.com
 lukebegley74@yahoo.com
 twmitchell56@yahoo.com
@@ -8,14 +8,14 @@ kkilcoyne@welchs.com
 creedbee99@comcast.net
 nedc@ekcnewbizdev.com
 info@campcaribou.com
-peter.monsen@gmail.com Peter.Monsen@acacia-inc.com
+peter.monsen@gmail.com
 jiaz@qti.qualcomm.com
 yanjies@qti.qualcomm.com
 nickaabate@gmail.com
 arotman3@gmail.com
 bennet_ih@yahoo.com
 zhenying@qti.qualcomm.com
-mswallac2000@gmail.com mswallac@qti.qualcomm.com
+mswallac2000@gmail.com
 mhalberstein@yahoo.com
 chris.cenotti@gmail.com
 keppler77@yahoo.com

@@ -1,6 +1,6 @@
 liu.fan.zju@gmail.com
 bennet_ih@yahoo.com
-chris_cotton@stratus.com chris.cotton@stratus.com
+chris.cotton@stratus.com
 chucklev@comcast.net
 creedbee99@comcast.net
 daniel3000@outlook.com
@@ -13,9 +13,9 @@ jonathan.frappier@gmail.com
 keppler77@yahoo.com
 lukebegley74@yahoo.com
 mhalberstein@yahoo.com
-mswallac2000@gmail.com mswallac@qti.qualcomm.com
+mswallac2000@gmail.com
 nickaabate@gmail.com
-peter.monsen@gmail.com Peter.Monsen@acacia-inc.com
+peter.monsen@gmail.com
 phochmut@gmail.com
 richard.brouillette@mt.com
 sjhowardyh@yahoo.com
