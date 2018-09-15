@@ -14,21 +14,13 @@ def emailFromAdmin(recipient, sub, content, wholelist=False):
     else:
       to = []
 
+    # Add the A List recipients
     if wholelist and bballdb.getUseAlist():
-      with open(ALIST_FILE, "r") as f:
-        for line in f:
-          line = line.strip()
-          if line:
-            names = line.split()
-            to.append(names[0]) # only use first name on a line
+      to.extend(i.split()[0] for i in bballdb.loadAList()) # only use first name on a line
             
+    # Add the B List recipients
     if wholelist:
-      with open(BLIST_FILE, "r") as f:
-        for line in f:
-          line = line.strip()
-          if line:
-            names = line.split() 
-            to.append(names[0]) # only use first name on a line
+      to.extend(i.split()[0] for i in bballdb.loadBList()) # only use first name on a line
     
     # Only unique entries, sorted
     to = list(sorted(set([i.lower() for i in to])))

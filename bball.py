@@ -167,12 +167,7 @@ class AlistPage(webapp2.RequestHandler):
                <h1>"A" list</h1>
                <div class="rosterbox">
                ''')
-      alist_list = []
-      with open(ALIST_FILE, 'r') as alist:
-        for line in alist:
-          line = line.strip()
-          if line:
-            alist_list.append(line.lower())
+      alist_list = bballdb.loadAList()
       for line in sorted(alist_list):
         self.response.out.write('<span id="alist">%s</span></br>\n' % cgi.escape(line))
       self.response.out.write('''</div></body></html>\n''')
@@ -189,12 +184,7 @@ class BlistPage(webapp2.RequestHandler):
                <h1>"B" list</h1>
                <div class="rosterbox">
                ''')
-      blist_list = []
-      with open(BLIST_FILE, 'r') as blist:
-        for line in blist:
-          line = line.strip()
-          if line:
-            blist_list.append(line.lower())
+      blist_list = bballdb.loadBList()
       for line in sorted(blist_list):
         self.response.out.write('<span id="blist">%s</span></br>\n' % cgi.escape(line))
       self.response.out.write('''</div></body></html>\n''')

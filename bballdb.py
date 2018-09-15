@@ -303,15 +303,29 @@ def emailParser(email):
     else:
         return (name + " <" + addr + ">", addr.lower())
     
+def _loadLineFile(file):
+    out_list = []
+    with open(file, 'r') as fh:
+      for line in fh:
+        line = line.strip()
+        if line:
+            out_list.append(line.lower())
+    return out_list
+  
+def loadAList():
+    return _loadLineFile(ALIST_FILE)
+    
+def loadBList():
+    return _loadLineFile(BLIST_FILE)
+    
 def playerIsAlist(email):
     email = email.strip()
     
-    with open(ALIST_FILE, 'r') as alist:
-      for line in alist:
-        line = line.strip()
-        for name in line.split():
-            if email.lower() == name.lower():
-                return True
+    alist = loadAList()
+    for line in alist:
+      for name in line.split():
+          if email.lower() == name.lower():
+              return True
 
     return False
 
