@@ -48,6 +48,10 @@ enable the devel framework to communicate with google app engine system:
 
 5)dev_appserver.py bballapp (to test)
 
+  On mac, might need this:
+
+     python2.7 /usr/local/bin/dev_appserver.py ballapp
+
 You can go to http://localhost:8000/ for the admin page.
 
 You can login at http://localhost:8080/_ah/login
