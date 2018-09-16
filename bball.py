@@ -168,11 +168,12 @@ class AlistPage(webapp2.RequestHandler):
                <body>
                <h1>"A" list</h1>
                <div class="rosterbox">
+               <ol>
                ''')
       alist_list = bballdb.loadAList()
       for line in sorted(alist_list):
-        self.response.out.write('<span id="alist">%s</span></br>\n' % cgi.escape(line))
-      self.response.out.write('''</div></body></html>\n''')
+        self.response.out.write('<li><span id="alist">%s</span></li>\n' % cgi.escape(line))
+      self.response.out.write('''</ol></div></body></html>\n''')
 
 class BlistPage(webapp2.RequestHandler):
     def get(self):
@@ -185,11 +186,12 @@ class BlistPage(webapp2.RequestHandler):
                <body>
                <h1>"B" list</h1>
                <div class="rosterbox">
+               <ol>
                ''')
       blist_list = bballdb.loadBList()
       for line in sorted(blist_list):
-        self.response.out.write('<span id="blist">%s</span></br>\n' % cgi.escape(line))
-      self.response.out.write('''</div></body></html>\n''')
+        self.response.out.write('<li><span id="blist">%s</span></li>\n' % cgi.escape(line))
+      self.response.out.write('''</ol></div></body></html>\n''')
 
 def getRosterStr(current_user=None):
     roster = bballdb.currentRoster(current_user=current_user)

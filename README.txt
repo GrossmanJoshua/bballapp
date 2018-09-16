@@ -21,6 +21,13 @@ Web page app console: (must be signed in)
 
 https://console.cloud.google.com/appengine
 
+# Adding new players
+
+**Make sure to add them with this key as the parent**:
+
+    Key(GameStatus, 'Bball')
+    
+
 # Old info that should be removed:
 
 DEVELOPMENT ENVIRONMENT:

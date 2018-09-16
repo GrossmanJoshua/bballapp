@@ -90,6 +90,10 @@ th.widen, td.widen {
   text-overflow: ellipsis;
 }
 
+.rosterbox ol {
+  text-align: left;
+}
+
 /* Playerlist formatting */
 table.playerlist {
   border-collapse: collapse;
