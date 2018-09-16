@@ -104,6 +104,7 @@ class PlayerStatus(ndb.Model):
     
     priorityScore = ndb.IntegerProperty(required=True)
     isAlist = ndb.BooleanProperty(required=True)
+    sendEmail = ndb.BooleanProperty(required=True, default=True)
     
     
     def signup_time(self):
@@ -183,7 +184,8 @@ def updatePlayerStatus(signup_player, playing, overflow):
                       
                       averageSignupTime = 0.0,
                       priorityScore = 0,
-                      isAlist = False)
+                      isAlist = False,
+                      sendEmail = True)
 
       update_player_status(player, signup_player, playing, overflow)
       player.put()
@@ -303,7 +305,7 @@ def emailParser(email):
     else:
         return (name + " <" + addr + ">", addr.lower())
     
-def _loadPlayerList(isAlist=None):
+def _loadPlayerList(isAlist=None, onlySendEmail=False):
     '''isAlist=None means return all players'''
     q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
                               default_options = ndb.QueryOptions(keys_only = True))
@@ -318,15 +320,15 @@ def _loadPlayerList(isAlist=None):
       except:
         continue
       else:
-        if player is not None:
+        if player is not None and (not onlySendEmail or player.sendEmail):
             emails.append(player.email.lower())
     return emails    
   
-def loadAList():
-    return _loadPlayerList(isAlist=True)    
+def loadAList(onlySendEmail=False):
+    return _loadPlayerList(isAlist=True, onlySendEmail=onlySendEmail)    
     
-def loadBList():
-    return _loadPlayerList(isAlist=False)    
+def loadBList(onlySendEmail=False):
+    return _loadPlayerList(isAlist=False, onlySendEmail=onlySendEmail)    
     
 def playerIsAlist(email):
     email = email.strip()
