@@ -171,8 +171,11 @@ class AlistPage(webapp2.RequestHandler):
                <ol>
                ''')
       alist_list = bballdb.loadAList()
-      for line in sorted(alist_list):
-        self.response.out.write('<li><span id="alist">%s</span></li>\n' % cgi.escape(line))
+      for name,email in sorted(alist_list):
+        if not name:
+          name = email
+        self.response.out.write('<li><a class="alist" href="mailto:%s">%s</span></li>\n' % 
+          (cgi.escape(email), cgi.escape(name)))
       self.response.out.write('''</ol></div></body></html>\n''')
 
 class BlistPage(webapp2.RequestHandler):
@@ -189,8 +192,11 @@ class BlistPage(webapp2.RequestHandler):
                <ol>
                ''')
       blist_list = bballdb.loadBList()
-      for line in sorted(blist_list):
-        self.response.out.write('<li><span id="blist">%s</span></li>\n' % cgi.escape(line))
+      for name,email in sorted(blist_list):
+        if not name:
+          name = email
+        self.response.out.write('<li><a class="alist" href="mailto:%s">%s</span></li>\n' % 
+          (cgi.escape(email), cgi.escape(name)))
       self.response.out.write('''</ol></div></body></html>\n''')
 
 def getRosterStr(current_user=None):

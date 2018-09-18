@@ -16,9 +16,9 @@ def emailFromAdmin(recipient, sub, content, wholelist=False):
 
     if wholelist:
       # Add the A List recipients
-      to.extend(i.split()[0] for i in bballdb.loadAList(onlySendEmail=True)) # only use first name on a line
+      to.extend(email.split()[0] for name,email in bballdb.loadAList(onlySendEmail=True)) # only use first name on a line
       # Add the B List recipients
-      to.extend(i.split()[0] for i in bballdb.loadBList(onlySendEmail=True)) # only use first name on a line
+      to.extend(email.split()[0] for name,email in bballdb.loadBList(onlySendEmail=True)) # only use first name on a line
     
     # Only unique entries, sorted
     to = list(sorted(set([i.lower() for i in to])))
