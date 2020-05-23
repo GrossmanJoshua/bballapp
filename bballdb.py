@@ -25,14 +25,14 @@ def isEarlySignup():
   '''The early signup phase'''
   status = getGameStatus()
   return status.inEarlySignup
-  
+
 def isSignupOpen():
   '''True if signup is open'''
   # Any time the game is open, it's open
   status = getGameStatus()
   return status.inSignup or status.inEarlySignup
 
-            
+
 class InvalidEmailException(Exception):
   pass
 
@@ -55,21 +55,25 @@ class UseAList(ndb.Model):
 
     useAlist = ndb.BooleanProperty(required=True)
 
+class SendEmails(ndb.Model):
+
+    sendEmails = ndb.BooleanProperty(required=True)
+
 class GameProperties(ndb.Model):
     weekDay = ndb.IntegerProperty(required=True) # 0 = Monday
     minNumPlayers = ndb.IntegerProperty(required=True) # Game if we get at least this many players
     maxNumPlayers = ndb.IntegerProperty(required=True) # Absolute max
-    
+
     # If this is different from maxNumPlayers then we will cut people above this
     # number *unless* we get at least maxNumPlayers
     provisionalNumPlayers = ndb.IntegerProperty(required=True)
-    
+
     # Game timing
     # isGameDay = ndb.BooleanProperty(required=True)
     # openRosterHoursPrior = ndb.IntegerProperty(required=True)
     # rosterStartTime = ndb.IntegerProperty(required=True)
     # rosterOpenTime = ndb.IntegerProperty(required=True)
-                          
+
 class LastGameNumberPlayers(ndb.Model):
 
     numPlayers = ndb.IntegerProperty(required=True)
@@ -96,7 +100,7 @@ class PlayerStatus(ndb.Model):
     numEarlySignups = ndb.IntegerProperty(required=True)
     averageSignupTime = ndb.FloatProperty(required=True)
     lastSignup = ndb.DateProperty(required=True)
-    
+
     gamesPlayed = ndb.IntegerProperty(required=True)
     gamesPlayedM = ndb.IntegerProperty(required=True)
     gamesPlayedW = ndb.IntegerProperty(required=True)
@@ -105,30 +109,30 @@ class PlayerStatus(ndb.Model):
 
     gamesCut = ndb.IntegerProperty(required=True)
     lastCut = ndb.DateProperty(required=False)
-    
+
     priorityScore = ndb.IntegerProperty(required=True)
     isAlist = ndb.BooleanProperty(required=True)
     sendEmail = ndb.BooleanProperty(required=True, default=True)
-    
-    
+
+
     def signup_time(self):
       '''signup time as a string'''
       hour = (int(self.averageSignupTime//60 + 7) + 24) % 24
       minute = int(self.averageSignupTime)%60
       return "{:2d}:{:02d}".format(hour, minute)
-    
+
 def today():
   '''Return the day of the week in EST'''
   today = datetime.today()
   return today + Eastern_tzinfo().utcoffset(today)
-   
+
 def get_game_props(weekday=None):
   '''Return a GameProperties object for the current day of the week'''
   q = GameProperties.query(default_options = ndb.QueryOptions(keys_only = True))
-                              
+
   if weekday is None:
     weekday = today().weekday()
-    
+
   dayKeys = q.filter(GameProperties.weekDay == weekday)
   if dayKeys.count():
       for dayProp in dayKeys:
@@ -137,9 +141,9 @@ def get_game_props(weekday=None):
           except BadValueError as e:
             dayProp.delete()
             continue
-            
+
           return day
-          
+
   logging.info('no properties for today, initializing to default')
 
   day = GameProperties(
@@ -152,10 +156,10 @@ def get_game_props(weekday=None):
     # rosterOpenTime = DEFAULT_ROSTER_OPEN_TIME,
     # isGameDay = weekday in DEFAULT_GAME_DAYS
   )
-  
+
   day.put()
   return day
-  
+
 # Update the player status
 def updatePlayerStatus(signup_player, playing, overflow):
     '''Given an email/name, find an entry in the PlayerStatus database and update it'''
@@ -164,12 +168,12 @@ def updatePlayerStatus(signup_player, playing, overflow):
 
     # Sanitize
     name, email = signup_player.name, signup_player.email
-    
+
     if (email == None):
       return False, None
 
     playerKeys = q.filter(PlayerStatus.email == email)
- 
+
     if not playerKeys.count():
       player = PlayerStatus(parent = ndb.Key('GameStatus','Bball'),
                       name=name,
@@ -177,16 +181,16 @@ def updatePlayerStatus(signup_player, playing, overflow):
                       numSignups=0,
                       numEarlySignups=0,
                       lastSignup = today(),
-                      
+
                       gamesPlayed = 0,
                       gamesPlayedM = 0,
                       gamesPlayedW = 0,
                       gamesPlayedF = 0,
                       lastGame = None,
-                      
+
                       gamesCut = 0,
                       lastCut = None,
-                      
+
                       averageSignupTime = 0.0,
                       priorityScore = 0,
                       isAlist = False,
@@ -200,44 +204,44 @@ def updatePlayerStatus(signup_player, playing, overflow):
             player = playerKey.get()
           except BadValueError:
             continue
-            
+
           update_player_status(player, signup_player, playing, overflow)
           player.put()
           break
-          
+
 def update_player_status(player, signup_player, playing, overflow):
   '''Update a players status data'''
-  
+
   if player.name is None and signup_player.name is not None:
     player.name = signup_player.name
-    
+
   early_signup = signup_player.earlySignup
   if early_signup:
     signup_timestamp = signup_player.earlySignupTime
   else:
     signup_timestamp = signup_player.timestamp
-    
+
   ts = signup_timestamp + Eastern_tzinfo().utcoffset(signup_timestamp)
   hour = ts.hour
   if hour >= 11:
     hour -= 24
   minutes_7am = (hour - 7) * 60 + ts.minute
-    
+
   player.lastSignup = today()
   player.numSignups += 1
-  
+
   if early_signup:
     player.numEarlySignups += 1
-  
+
   # Compute the average signup time as minutes from 7AM
   alpha = 1.0/player.numSignups
   player.averageSignupTime = (minutes_7am * alpha) + player.averageSignupTime * (1.0 - alpha)
-  
+
   if playing:
     player.lastGame = player.lastSignup
     player.gamesPlayed += 1
     mwf = player.lastGame.weekday()
-    
+
     if mwf == 0:
       player.gamesPlayedM += 1
     elif mwf == 2:
@@ -251,23 +255,23 @@ def update_player_status(player, signup_player, playing, overflow):
     player.gamesCut += 1
     player.lastCut = player.lastSignup
     player.priorityScore += CUT_SCORE_INCREMENT
-    
+
 def getPlayerStatus():
     return PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'))
-  
+
  #class AutoListControl(ndb.Model):
 #    mon = ndb.BooleanProperty(required=True)
 #    tue = ndb.BooleanProperty(required=True)
 #    wed = ndb.BooleanProperty(required=True)
 #    thu = ndb.BooleanProperty(required=True)
 #    fri = ndb.BooleanProperty(required=True)
-    
+
 def localTimeNow():
   ts = datetime.utcnow()
   et = Eastern_tzinfo().utcoffset(ts)
   ts = ts + et
   return ts
-  
+
 def _getNameForEmail(email):
   q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
                             default_options = ndb.QueryOptions(keys_only = True))
@@ -281,17 +285,17 @@ def _getNameForEmail(email):
       if player and player.name:
         return player.name
   return None
-  
+
 # Returns a tuple of the full address, sanitized, and the raw email address
 def emailParser(email):
     email = email.strip()
     reMatch = re.search(r'^(.*)\<([^\>]+)\>', email)
-    
+
     if reMatch == None:
         atLoc = email.find("@")
         if (atLoc < 0):
             return None,None
-        
+
         reMatch = re.match(r'(.*) (\S+)', email[0:atLoc])
         if (reMatch != None):
           name = reMatch.group(1).strip()
@@ -303,29 +307,29 @@ def emailParser(email):
     else:
         name = reMatch.group(1).strip()
         addr = reMatch.group(2).strip()
-    
+
     name = re.sub(r'[^\w ]',' ', name)
     name = name.strip()
-    
+
     if len(name) == 0:
         name = None
 
     addr = re.sub(r'\s.*','',addr)
     if addr.count("@") != 1:
         return None, None
-    
+
     if not re.match(r'''[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?''', addr, re.I):
         return None, None
-    
+
     # Lower case the address
     if addr.lower() in ['your_email@your_domain.com', 'john@doe.net']:
         return None, None
-        
+
     # Lower case the address
     if name is None:
         name = _getNameForEmail(addr)
     return usernameEmailType(name, addr.lower())
-    
+
 def _loadPlayerList(isAlist=None, onlySendEmail=False):
     '''isAlist=None means return all players'''
     q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
@@ -343,17 +347,17 @@ def _loadPlayerList(isAlist=None, onlySendEmail=False):
       else:
         if player is not None and (not onlySendEmail or player.sendEmail):
             emails.append(usernameEmailType(player.name, player.email.lower()))
-    return emails    
-  
+    return emails
+
 def loadAList(onlySendEmail=False):
-    return _loadPlayerList(isAlist=True, onlySendEmail=onlySendEmail)    
-    
+    return _loadPlayerList(isAlist=True, onlySendEmail=onlySendEmail)
+
 def loadBList(onlySendEmail=False):
-    return _loadPlayerList(isAlist=False, onlySendEmail=onlySendEmail)    
-    
+    return _loadPlayerList(isAlist=False, onlySendEmail=onlySendEmail)
+
 def playerIsAlist(email):
     email = email.strip()
-    
+
     alist = loadAList()
     for line in alist:
       for name in line.email.split():
@@ -363,15 +367,15 @@ def playerIsAlist(email):
     return False
 
 def getPriorityScore(email):
-    
+
     if (email == None):
       return 0
-      
+
     q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
                               default_options = ndb.QueryOptions(keys_only = True))
 
     playerKeys = q.filter(PlayerStatus.email == email)
- 
+
     if not playerKeys.count():
       return 0
     else:
@@ -381,7 +385,7 @@ def getPriorityScore(email):
         except:
           continue
         return player.priorityScore
-  
+
 def addPlayer(person,pref_str):
     class signupPlayer(object):
       def __init__(self, full_email, email_address, pref, newplayer):
@@ -389,34 +393,34 @@ def addPlayer(person,pref_str):
         self.email_address = email_address
         self.pref = pref
         self.newplayer = newplayer
-    
+
     pref = prefMap[pref_str]
-    
+
     players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
-    
+
     # Sanitize
     name, email = emailParser(person)
-    
+
     if (email == None):
       raise InvalidEmailException("Invalid email %s" % person)
 
     # if not name:
     #   name = email
-      
+
     # Get whether the player is a-list
     if getUseAlist():
       isAlist = playerIsAlist(email)
     else:
       # If the alist is not being used, it's always false
       isAlist = False
-      
+
     #JJG: turn this on for email validation
     #is_valid = validate_email(email)
     #if not is_valid:
     #  return False, "Email address is not valid: %s" % person, None
 
     priorityScore = getPriorityScore(email)
-    
+
     if players.count():
         for player in players:
             if player.email == email:
@@ -434,7 +438,7 @@ def addPlayer(person,pref_str):
                     isAlist = isAlist,
                     earlySignup = isEarlySignup())
     player.put()
-    
+
     # # To stop a race to sign up right at the start, we randomize the start time
     # # for people who sign up before a pre-determine start time.
     # ts = player.timestamp
@@ -447,7 +451,7 @@ def addPlayer(person,pref_str):
     #   offset += 3600 * (OPEN_HOUR_RANDOM-ts.hour)  # Offset by the extra hours to get after the open period
     #   player.timestamp += timedelta(seconds=offset)
     #   player.put() # add it back to the dB with the alternate timestamp
-      
+
     return signupPlayer(name, email, pref_str, True)
 
 rePref = re.compile(r'(([1-5])\s*[xX]\s*\2)')
@@ -459,7 +463,7 @@ rePref = re.compile(r'(([1-5])\s*[xX]\s*\2)')
 
 def addSignUpPlayer(sender,subject):
     reObj = rePref.search(subject)
-    pref = "4x4" if not reObj else reObj.group(1).replace(" ","").lower() 
+    pref = "4x4" if not reObj else reObj.group(1).replace(" ","").lower()
     if isSignupOpen():
         player = addPlayer(sender,pref)
         # bballoutmail.successSignUpMsg(sender,pref)
@@ -468,7 +472,7 @@ def addSignUpPlayer(sender,subject):
     else:
         # bballoutmail.failSignUpMsg(sender)
         raise NoGameStartedException("game not started")
-    
+
 
 # Remove a player from the signup list
 def removePlayer(person):
@@ -476,13 +480,13 @@ def removePlayer(person):
                               default_options = ndb.QueryOptions(keys_only = True))
     # Sanitize
     name, email = emailParser(person)
-    
+
     if (email == None):
       return False, None
 
     if not name:
       name = email
-      
+
     playerKeys = q.filter(Player.email == email)
     if playerKeys.count():
         ndb.delete_multi(playerKeys)
@@ -497,7 +501,7 @@ def removeSignUpPlayer(sender):
         pass
         # bballoutmail.signOffMsg(sender,retVal)
     return retVal, sender
-    
+
 
 def setLastGameNumPlayers(val):
     Akey = ndb.Key('LastGameNumberPlayers','Bball')
@@ -527,7 +531,7 @@ def getLastGameNumPlayers():
 
 
     return status.numPlayers
-    
+
 def setUseAlist(state):
     Akey = ndb.Key('UseAList','Bball')
     try:
@@ -556,11 +560,40 @@ def getUseAlist():
 
 
     return status.useAlist
-    
+
+def setSendEmails(state):
+    Akey = ndb.Key('SendEmails','Bball')
+    try:
+        status = Akey.get()
+        if not status: raise Exception
+    except:
+        logging.info("SendEmails object entity does not exist -- creating...")
+        status = SendEmails(key=Akey)
+
+    status.sendEmails = state
+    status.put()
+
+    logging.info("setSendEmails to %s" % ("True" if status.sendEmails else "False") )
+    return "Send emails is now %s" % str(state)
+
+def getSendEmails():
+    Akey = ndb.Key('SendEmails','Bball')
+    try:
+        status = Akey.get()
+        if not status: raise Exception
+    except:
+        logging.info("SendEmails object entity does not exist -- creating...")
+        status = SendEmails(key=Akey)
+        status.sendEmails = True
+        status.put()
+
+
+    return status.sendEmails
+
 # Set sign up mode - True enables sign up mode, False disables
 def setGameStatus(state, early_state=False):
 
-        
+
     GSkey = ndb.Key('GameStatus','Bball')
     try:
         status = GSkey.get()
@@ -571,17 +604,17 @@ def setGameStatus(state, early_state=False):
 
     #if not status:
         #status = GameStatus(inSignup = False, key_name='Bball')
-        
+
     status.inSignup = state
     status.inEarlySignup = early_state
-      
+
     status.put()
 
     logging.info("setGameStatus to %s" % ("True - in signup mode" if status.inSignup else "False - signup is inactive") )
     return "Game Status is now %s" % str(state)
 
 def getGameStatus():
-      
+
   GSkey = ndb.Key('GameStatus','Bball')
   try:
       status = GSkey.get()
@@ -592,9 +625,9 @@ def getGameStatus():
       status.inSignup = False
       status.inEarlySignup = False
       status.put()
-      
+
   return status
-  
+
 # There are three states to the game:
 #
 #  1. Signup is open: players can signup
@@ -603,7 +636,7 @@ def getGameStatus():
 def isEmailSent():
   status = getGameStatus()
   return status.inSignup
-  
+
 # def getGameStatus():
 #
 #
@@ -622,7 +655,7 @@ def isEmailSent():
 
 def getGameDateTime():
 
-        
+
     GSkey = ndb.Key('GameStatus','Bball')
     try:
         status = GSkey.get()
@@ -644,7 +677,7 @@ def removePlayers():
         ndb.delete_multi(playerKeys)
     setGameStatus(False)
     return True
-    
+
 def currentRoster(current_user=None, nocolor=False):
     class roster(object):
       '''roster_list is the list of players playing. alt_roster_list is the list of alternate
@@ -665,18 +698,18 @@ def currentRoster(current_user=None, nocolor=False):
           else:
             row_classes.append('notsafe')
         row_classes.append({True: 'alist', False: 'blist'}[player.isAlist])
-        
+
         if self.current_user is not None:
           _, email = emailParser(player.email)
-          
+
           if email == self.current_user:
             row_classes.append('its_me')
-          
+
         if player.name:
           mailto = '<a href="mailto:{}">{}</a>'.format(cgi.escape(player.email), cgi.escape(player.name))
         else:
           mailto = '<a href="mailto:{}">{}</a>'.format(cgi.escape(player.email), cgi.escape(player.email))
-          
+
         return '''<tr class="{row}">
         <td>{idx}</td>
         <td>{name}</td>
@@ -690,14 +723,14 @@ def currentRoster(current_user=None, nocolor=False):
           early=('<sup>*</sup>' if player.earlySignup else ''),
           score=player.priorityScore
         )
-      
+
       @staticmethod
       def _bracket_name(player):
         if player.name:
           return '{} <{}>'.format(player.name, player.email)
         else:
           return player.email
-        
+
       @property
       def roster_list_str(self):
         return '\n'.join([roster._bracket_name(x) for x in self.roster_list])
@@ -723,52 +756,51 @@ def currentRoster(current_user=None, nocolor=False):
 
     if current_user is not None:
       _, current_user = emailParser(current_user)
-      
+
     playerKeys = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
     if playerKeys.count():
       play_list, cut_list = sort_player_list(playerKeys)
-      
       return roster(play_list, cut_list, current_user=current_user)
 
     return roster([],[])
-    
+
 def playerHasPriority(x,y):
   '''Sort cmp function. The return value is negative if x < y, zero if x == y and strictly positive if x > y.'''
   if x.priorityScore == y.priorityScore:
     return cmp(x.timestamp, y.timestamp)
-    
+
   elif x.priorityScore > y.priorityScore:
     if x.timestamp - PRIORITY_TIMING <= y.timestamp:
       return -1
     else:
       return 1
-      
+
   else: # y.priorityScore > x.priorityScore
     if y.timestamp - PRIORITY_TIMING <= x.timestamp:
       return 1
     else:
       return -1
-  
+
 def sort_player_list(playerKeys):
   '''Sort the player list'''
   # Load the properties for this game
   game_props = get_game_props()
-  
+
   myPlayers = []
   for player in playerKeys:
       myPlayers.append( player )
-        
+
   a_list = sorted([x for x in myPlayers if x.isAlist], cmp=playerHasPriority)
   b_list = sorted([x for x in myPlayers if not x.isAlist], cmp=playerHasPriority)
-        
+
   full_list = a_list + b_list
-  
+
   # The provisional list is the A-list when we have an A-list, otherwise it's everyone
   if getUseAlist():
     provisional_list = a_list
   else:
     provisional_list = full_list
-    
+
   # Determine the number of players
   if (len(provisional_list) > game_props.provisionalNumPlayers and
       len(full_list) >= game_props.maxNumPlayers):
@@ -776,30 +808,30 @@ def sort_player_list(playerKeys):
      cutoff = game_props.maxNumPlayers
   else:
      cutoff = game_props.provisionalNumPlayers
-            
+
   return full_list[:cutoff], full_list[cutoff:]
-        
+
 def pref2numPlayers( i ):
     return str(i/2) + 'x' + str(i/2)
 
-    
+
 
 def numPlayers2pref( s ):
     try:
         return prefMap[s]
     except:
         return 8
-    
+
 def finalizeEarlyRoster():
     '''Set the start times for the early roster spots'''
     players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
 
     # For players who start early, we randomize their time in some window
-    # Get the time 
+    # Get the time
     ts = localTimeNow()
     ts = datetime(year=ts.year, month=ts.month, day=ts.day, hour=0, minute=0, second=0)
     et = Eastern_tzinfo().utcoffset(ts)
-    
+
     for player in players:
       player.earlySignupTime = player.timestamp
       offset = random.randint(RANDOM_MINUTES_START*60, RANDOM_MINUTES_END*60) # Pick a random integer in the N minute range
@@ -810,13 +842,13 @@ def startEarlyRoster():
     if not isSignupOpen():
         setGameStatus(False, True)
         return True
-        
-    logging.info("startEarlyRoster failed - already in early signup mode")        
+
+    logging.info("startEarlyRoster failed - already in early signup mode")
     return False
 
 def startRoster(test, tues_thurs):
     finalizeEarlyRoster()
-      
+
     if not isEmailSent():
         # # If today is tuesday or thursday and yesterday's game didn't get many people and we're using "summer"
         # # rules, then start a game. Otherwise exit
@@ -824,12 +856,12 @@ def startRoster(test, tues_thurs):
         # if tues_thurs and (getLastGameNumPlayers() > MAX_NUM_PLAYERS_TUES_THURS or getUseAlist()):
         #     logging.info("startRoster skipped - tuesday thursday")
         #     return False
-            
+
         setGameStatus(True)
         if not test: bballoutmail.gameDayMsg()
         return True
 
-    logging.info("startRoster failed - already in signup mode")        
+    logging.info("startRoster failed - already in signup mode")
     return False
 
 # def checkNoPlayersWithEmailToEncourage(test):
@@ -850,7 +882,7 @@ def startRoster(test, tues_thurs):
 
 
 def isGame():
-    
+
     players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
 
     game_props = get_game_props()
@@ -873,8 +905,8 @@ def isGame():
     #     return max(hasToPlay)
     # else:
     #     return 0
-    
-    
+
+
 def checkNoPlayers():
     class gameOnStatus(object):
       '''gameon is a boolean whether the game is on. numplayers is how many people
@@ -885,53 +917,39 @@ def checkNoPlayers():
         self.numplayers = numplayers
         self.play_list = play_list
         self.cut_list = cut_list
-      
+
       def overflow(self, isAlist):
         if getUseAlist() and isAlist:
           return any(i.isAlist for i in self.cut_list)
         else:
           return len(self.cut_list) > 0
-        
+
       def __str__(self):
         return 'gameon=%s,numplayers=%d,play_list=%d,cut_list=%d'%(str(self.gameon),self.numplayers,len(play_list), len(cut_list))
-        
+
     play_list, cut_list = isGame()
     if play_list:
         return gameOnStatus(True, len(play_list), play_list, cut_list)
-        
-    # players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
-   #  cnt = players.count()
-   #  if cnt:
-   #    prefs = [player.preference for player in players]
-   #    numGamePlayers = isGame(prefs)
-   #  else:
-   #    numGamePlayers = 0
-   #  if numGamePlayers > 0:
-   #      numHasToPlay = sum([x<=numGamePlayers for x in prefs])
-   #      if (cnt > numHasToPlay):
-   #        obligation = ["%dx%d" % (x,x) for x in range(1,numGamePlayers/2+1) if (2*x) in prefs]
-   #      else:
-   #        obligation = []
-   #
-   #      return gameOnStatus(True, cnt, obligation)
     else:
-      return gameOnStatus(False, 0, [], [])
+        players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
+        play_list, cut_list = sort_player_list(players)
+        return gameOnStatus(False, players.count(), play_list + cut_list, [])
 
 def savePlayerStatus(gamestat):
   '''Update everyone who signed-up's status'''
   for player in gamestat.play_list:
     overflow = gamestat.overflow(player.isAlist)
     updatePlayerStatus(player, True, overflow)
-    
+
   for player in gamestat.cut_list:
     overflow = gamestat.overflow(player.isAlist)
     updatePlayerStatus(player, False, overflow)
-    
+
 def postRoster(test):
     if isEmailSent():
         if not test: setGameStatus(False)
         gamestat = checkNoPlayers()
-        
+
         # Log the number of players
         players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
         signup_cnt = players.count()
@@ -942,12 +960,12 @@ def postRoster(test):
             if not test: bballoutmail.gameRosterMsg(currentRoster())
             return (gamestat)
         else:
-            if not test: bballoutmail.noGameMsg(gamestat.numplayers)
+            if not test: bballoutmail.noGameMsg(signup_cnt)
             return (gamestat)
 
     logging.info("postRoster failed - not in signup mode")
     return False
-       
+
 def addSubscriber(person):
     try:
       subscribers = Subscriber.query(ancestor = ndb.Key('Subscribers','Bball'))
@@ -956,13 +974,13 @@ def addSubscriber(person):
       status = SubscriberList(key=Subkey)
       status.put()
       subscribers = Subscriber.query(ancestor = ndb.Key('Subscribers','Bball'))
-    
+
     # Sanitize
     name, email = emailParser(person)
-    
+
     if not name:
       name = email
-    
+
     my_subscriber = [subscriber for subscriber in subscribers if subscriber.email == email]
     if my_subscriber:
       # already there, update name
@@ -972,7 +990,7 @@ def addSubscriber(person):
       subscriber = Subscriber(parent = ndb.Key('Subscribers','Bball'),
                               email = email,
                               name = name)
-    
+
     subscriber.put()
     return name, email
 
@@ -982,10 +1000,10 @@ def removeSubscriber(email):
                               default_options = ndb.QueryOptions(keys_only = True))
     except:
       return False
-      
+
     # Sanitize
     name, email = emailParser(email)
-    
+
     if (email == None):
       return False
 
@@ -993,7 +1011,7 @@ def removeSubscriber(email):
     if playerKeys.count():
         ndb.delete_multi(playerKeys)
         return True
-    
+
     return False
 
 def getAllSubscribers():
@@ -1004,7 +1022,7 @@ def getAllSubscribers():
       status = SubscriberList(key=Subkey)
       status.put()
       subscribers = Subscriber.query(ancestor = ndb.Key('Subscribers','Bball'))
- 
+
     return [x.email for x in subscribers]
 
 def validate_email(email):
@@ -1023,13 +1041,13 @@ def signupRandomPlayers():
     else:
       email = 'Josh Grossman {} <josh{}@nothing.com>'.format(i,i)
     addPlayer(email, '4x4')
-    
+
   players = Player.query(ancestor = ndb.Key('GameStatus','Bball'))
-  
+
   ts = localTimeNow()
   ts = datetime(year=ts.year, month=ts.month, day=ts.day, hour=0, minute=0, second=0)
   et = Eastern_tzinfo().utcoffset(ts)
-  
+
   for player in players:
     offset = random.randint(7*60*60, 9*60*60) # Pick a random integer in the N minute range
     player.timestamp = ts + timedelta(seconds=offset) - et

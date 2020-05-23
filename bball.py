@@ -24,6 +24,7 @@ from bballconfig import *
 
 funcMap = { "setGameStatus" : (1,"bballdb"),
             "setUseAlist"   : (1,"bballdb"),
+            "setSendEmails" : (1,"bballdb"),
             "addPlayer"     : (2,"bballdb"),
             "removePlayer"  : (1,"bballdb"),
             "startRoster"   : (2,"bballdb"),
@@ -74,7 +75,7 @@ class DirectionsPage(webapp2.RequestHandler):
             self.response.out.write('''<p class="block">Percy Rideout Playground</p>
                 <a href="http://goo.gl/maps/LH5GZ" target="_blank"><p class="block">Intersection of Laws Brook Road and Conant St</p>
                 <p class="block">West Concord, MA 01742</p></a>
- 
+
                 <p>Courts are on the Laws Brook Road side of the park.</p>
 
                 <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3081.5904116212882!2d-71.399879!3d42.457339999999995!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e3908e05aced69%3A0xdb622158aef8cecc!2sRideout+Playground!5e1!3m2!1sen!2sus!4v1411135681769" width="95%" height="450" frameborder="0" style="border:0"></iframe>
@@ -110,7 +111,7 @@ class PlayersListPage(webapp2.RequestHandler):
          <th>Total</th><th>Last</th>
        </thead><tbody>
        ''')
-      
+
       # email = ndb.StringProperty(required=True)
       # numSignups = ndb.IntegerProperty(required=True)
       # gamesPlayedM = ndb.IntegerProperty(required=True)
@@ -124,13 +125,13 @@ class PlayersListPage(webapp2.RequestHandler):
       # isAlist = ndb.BooleanProperty(required=True)
 
       players = bballdb.getPlayerStatus()
-      
+
       def email_subst(email):
         email = email.split('@')[0]
         #email = email.replace('@','-at-')
         #email = email.replace('.','-dot-')
         return email
-        
+
       for player in sorted(players, key=lambda i: i.email):
         listclass = {True: 'alist', False: 'blist'}
         self.response.out.write('''
@@ -174,7 +175,7 @@ class AlistPage(webapp2.RequestHandler):
       for name,email in sorted(alist_list):
         if not name:
           name = email
-        self.response.out.write('<li><a class="alist" href="mailto:%s">%s</span></li>\n' % 
+        self.response.out.write('<li><a class="alist" href="mailto:%s">%s</span></li>\n' %
           (cgi.escape(email), cgi.escape(name)))
       self.response.out.write('''</ol></div></body></html>\n''')
 
@@ -195,13 +196,13 @@ class BlistPage(webapp2.RequestHandler):
       for name,email in sorted(blist_list):
         if not name:
           name = email
-        self.response.out.write('<li><a class="alist" href="mailto:%s">%s</span></li>\n' % 
+        self.response.out.write('<li><a class="alist" href="mailto:%s">%s</span></li>\n' %
           (cgi.escape(email), cgi.escape(name)))
       self.response.out.write('''</ol></div></body></html>\n''')
 
 def getRosterStr(current_user=None):
     roster = bballdb.currentRoster(current_user=current_user)
-    #logging.info("getInprogressPage %s" % (str(roster))) 
+    #logging.info("getInprogressPage %s" % (str(roster)))
     retstr = '''
           <h1>Signup Roster</h1>
           <p style="text-align:center">%(time)s</p>
@@ -212,7 +213,7 @@ def getRosterStr(current_user=None):
           they have been recently cut from games due to too many players). A name will be shaded <span style="color:#FC002D">red</span>,
           until that happens. Non-A-list players will be cut from the team from the bottom of this list
           up as "A-list" players sign-up. An asterisk denotes a player who used early signup.</p>
-          <p class="content_mobile"><span class="alist">Highlighted players</span> are on the "A-list". A name shaded 
+          <p class="content_mobile"><span class="alist">Highlighted players</span> are on the "A-list". A name shaded
           <span style="color:#FC002D">red</span> can be bumped by a player with higher priority. This lasts
           until an hour after signup.</p>
           ''' % {
@@ -249,9 +250,9 @@ class AddName(webapp2.RequestHandler):
             except KeyError:
               defaultUserName = 'John Doe <john@doe.net>'
               js_focus = '''onfocus="if(this.value=='%s') this.value='';"''' % defaultUserName
-            
+
             js_focus += ''' onblur="if(this.value=='') this.value='%s';" ''' % defaultUserName
-            
+
             defaultUserName = defaultUserName.replace('"', '')
             self.response.out.write('''
              <html>
@@ -303,11 +304,11 @@ class AddName(webapp2.RequestHandler):
                <body>
                   <h2>Posted roster is frozen until sign up starts again</h2>
                 </body>
-               </html>   
-             ''' % {'title':PAGE_TITLE, 'head':htmlHead()})            
+               </html>
+             ''' % {'title':PAGE_TITLE, 'head':htmlHead()})
 
     def post(self):
-        
+
         player = self.request.get('player')
         #pref   = self.request.get('pref')
         pref = "4x4"
@@ -346,11 +347,11 @@ class AddName(webapp2.RequestHandler):
             </html>''' % {'title':PAGE_TITLE,'details':str(e), 'head':htmlHead()})
             return
 
-        # Save the current address to the cookie  
+        # Save the current address to the cookie
         self.response.set_cookie('emailAddress', player, max_age=31536000, secure=False)
-        
+
         self.redirect("/roster")
-        
+
         # # Get the roster pane
         # rosterstr = getRosterStr()
         #
@@ -382,22 +383,22 @@ class AddName(webapp2.RequestHandler):
 class Graphs(webapp2.RequestHandler):
   def get(self):
     email_split = lambda x: x.split('@')[0]
-    
+
     with open('graphs.html') as f:
       data = f.read()
-      
+
     templ = string.Template(data)
 
     # players = list(sorted(bballdb.getPlayerStatus(), key=lambda x: (x.gamesPlayedM+x.gamesPlayedW+x.gamesPlayedF+x.gamesCut), reverse=True))
     players = list(sorted(bballdb.getPlayerStatus(), key=lambda x: (x.gamesPlayed+x.gamesCut), reverse=True))
-    
+
     mapping = {}
     mapping['bar_data_m'] = '[{}]'.format(','.join(str(i.gamesPlayedM) for i in players))
     mapping['bar_data_w'] = '[{}]'.format(','.join(str(i.gamesPlayedW) for i in players))
     mapping['bar_data_f'] = '[{}]'.format(','.join(str(i.gamesPlayedF) for i in players))
     mapping['bar_data_cut'] = '[{}]'.format(','.join(str(i.gamesCut) for i in players))
     mapping['names'] = '[{}]'.format(','.join("'{}'".format(email_split(i.email)) for i in players))
-    
+
     players = list(sorted(players, key=lambda x: (x.averageSignupTime), reverse=False))
     max_games = max(i.gamesPlayed for i in players)
     mapping['bubble_names'] = '[{}]'.format(','.join("'{}'".format(email_split(i.email)) for i in players))
@@ -423,7 +424,7 @@ class RemoveName(webapp2.RequestHandler):
             except KeyError:
               defaultUserName = 'John Doe <john@doe.net>'
               js_focus = '''onfocus="if(this.value=='%s') this.value='';"''' % defaultUserName
-            
+
             js_focus += ''' onblur="if(this.value=='') this.value='%s';" ''' % defaultUserName
             defaultUserName = defaultUserName.replace('"', '')
             self.response.out.write('''
@@ -443,11 +444,11 @@ class RemoveName(webapp2.RequestHandler):
               </html>''' % {'head':htmlHead(),'focus':js_focus,'name':defaultUserName})
         else:
             self.response.out.write('''
-             <html><body><h2>Posted roster is frozen until sign up starts again</h2></body></html>   
-             ''')            
+             <html><body><h2>Posted roster is frozen until sign up starts again</h2></body></html>
+             ''')
 
     def post(self):
-        
+
         player = self.request.get('player')
         status, player = bballdb.removeSignUpPlayer(player)
         self.response.set_cookie('emailAddress', player, max_age=31536000, secure=False)
@@ -505,7 +506,7 @@ class AddSubscriber(webapp2.RequestHandler):
         else:
           title = "Error! Subscribe"
           content = "You could not be subscribed to the mailing list"
-        
+
         logging.info(repr(bballdb.getAllSubscribers()))
         self.response.out.write('''
             <html>
@@ -543,7 +544,7 @@ class Roster(webapp2.RequestHandler):
       except:
         print('no cookie')
         current_user = None
-        
+
       retstr = getRosterStr(current_user=current_user)
       retstr += '''            <table style="width:100%%"><tr>
             <td class="td_button" style="width:50%%"><a class="a_button full_height" href="/signup">Sign up for today's game</a></td>
@@ -551,7 +552,7 @@ class Roster(webapp2.RequestHandler):
             </tr></table>
       '''
       return retstr
-      
+
     def getGameDecisionPage(self):
       gamestat = bballdb.checkNoPlayers()
       gametime = cgi.escape(bballdb.getGameDateTime())
@@ -573,7 +574,7 @@ class Roster(webapp2.RequestHandler):
               <p class="emph" style="text-align:center">Only %(nump)d player%(s)s signed up</p>
               <div class="rosterbox">%(roster)s</div>
               ''' % {
-                'time':gametime, 
+                'time':gametime,
                 'nump':gamestat.numplayers,
                 's':'s' if gamestat.numplayers>1 else '',
                 'roster':roster.roster_list_html
@@ -585,7 +586,7 @@ class Roster(webapp2.RequestHandler):
             <p class="emph" style="text-align:center">%(nump)d players - game at noon</p>
             <div class="rosterbox">%(roster)s</div>
             ''' % {
-              'time':gametime, 
+              'time':gametime,
               'nump':len(roster.roster_list),
               'roster':roster.roster_list_html
             }
@@ -632,7 +633,7 @@ class Roster(webapp2.RequestHandler):
 # class SubscribeToGroup(webapp2.RequestHandler):
 
     # def get(self):
-        
+
         # self.response.headers['Content-Type'] = 'text/html'
         # self.response.out.write('''
             # <html>
@@ -647,7 +648,7 @@ class Roster(webapp2.RequestHandler):
             # </html>
             # ''' % {'message':bballoutmail.subscribeEmail(), 'head':htmlHead()})
 
-####################################################################################        
+####################################################################################
 # Handler to test and control major app functions listed in funcMap avove
 # url is http://bball@appspot.com/control?function=<func>&arg1=<arg>&arg2=....
 ####################################################################################
@@ -655,7 +656,7 @@ class Roster(webapp2.RequestHandler):
 class Control(webapp2.RequestHandler):
 
     # Method to build a string from URL that can be evaled to
-    # to run a python function with arguments 
+    # to run a python function with arguments
     def funcString(self):
 
         #try:
@@ -675,40 +676,53 @@ class Control(webapp2.RequestHandler):
     # Method to parse and correctly type argments in URL
     def funcArg(self, argName):
         arg = self.request.get(argName)
-        
+
         # See if arg evals as a valid object e.g. bool or int. WARNING
         # this will also eval strings that happen to be valid objects!!!
         try:
             eval(arg)
             return arg
-        
+
         # If not assume arg is a string
         except:
             return '"%s"' % arg
-    
+
     def get(self):
-        
+
         fstr = self.funcString()
         if not fstr:
-            
+
             # If unable to parse function from URL then ERROR
             self.response.headers['Content-Type'] = 'text/html'
             self.response.out.write('<html><body>ERROR</body></html>')
 
         else:
-            
+
             # Run Function and display result
             funcRet = eval(fstr)
             logging.info("Executed %s and it returned %s" % (fstr, str(funcRet)))
             self.response.headers['Content-Type'] = 'text/html'
-            self.response.out.write('<html><body>Executed <pre>')
+            self.response.out.write('<html><head>')
+            self.response.out.write(htmlHead())
+            self.response.out.write('''<style>
+            body {
+                max-width: 640px;
+                margin-left: auto;
+                margin-right: auto;
+                padding: 1em;
+                border: 1px solid #eeeeee;
+                border-radius: 15px;
+            }
+            </style>''')
+            self.response.out.write('</head><body>Executed <pre>')
             self.response.out.write(cgi.escape(fstr))
             self.response.out.write('</pre>and returned<pre>')
             self.response.out.write(cgi.escape(str(funcRet)))
+            self.response.out.write('</pre><a href="/admin">Back to admin page</a>')
             self.response.out.write('</body></html>')
 
-                                
-        
+
+
 class StartSignup(webapp2.RequestHandler):
     def get(self):
         # Run Function and display result
@@ -729,8 +743,8 @@ class StartSignup(webapp2.RequestHandler):
             </html>
             '''% {'head':htmlHead()})
 
-                                
-        
+
+
 # Web page mappings - each page maps to a Handler above
 app = webapp2.WSGIApplication([(r'/', MainPage),
                                (r'/directions', DirectionsPage),
