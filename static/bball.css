@@ -197,6 +197,9 @@ input[type="submit"]:active {
   top:1px;
 }
 
+input[type="submit"] {
+  margin-top: 0.5em;
+}
 /* Headings */
 h1 {
   font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
