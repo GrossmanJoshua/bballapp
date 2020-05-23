@@ -286,6 +286,23 @@ def _getNameForEmail(email):
         return player.name
   return None
 
+def getPlayerStatusForEmail(email):
+    '''given an email (possibly including real name), return the PlayerStatus object'''
+    parsed = emailParser(email)
+    email = parsed.email
+
+    q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
+                            default_options = ndb.QueryOptions(keys_only = True))
+    playerKeys = q.filter(PlayerStatus.email == email.lower())
+    for player in playerKeys:
+        try:
+            player = player.get()
+        except:
+            continue
+        else:
+            return player
+    return None
+
 # Returns a tuple of the full address, sanitized, and the raw email address
 def emailParser(email):
     email = email.strip()
@@ -386,6 +403,13 @@ def getPriorityScore(email):
           continue
         return player.priorityScore
 
+def setSendEmailForPlayer(email, sendEmail):
+    '''change the send email status for a player based on email'''
+    player = getPlayerStatusForEmail(email)
+    if player:
+        player.sendEmail = sendEmail
+        player.put()
+
 def addPlayer(person,pref_str):
     class signupPlayer(object):
       def __init__(self, full_email, email_address, pref, newplayer):
@@ -461,11 +485,12 @@ rePref = re.compile(r'(([1-5])\s*[xX]\s*\2)')
 # especially if you just manually set datastore though admin console.  Always
 # flush cache manually from console page in these situations
 
-def addSignUpPlayer(sender,subject):
+def addSignUpPlayer(sender,subject,sendEmail=True):
     reObj = rePref.search(subject)
     pref = "4x4" if not reObj else reObj.group(1).replace(" ","").lower()
     if isSignupOpen():
         player = addPlayer(sender,pref)
+        setSendEmailForPlayer(sender, sendEmail)
         # bballoutmail.successSignUpMsg(sender,pref)
         #checkNoPlayers(test=False)
         return player

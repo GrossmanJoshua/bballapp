@@ -249,7 +249,18 @@ class AddName(webapp2.RequestHandler):
               js_focus = ''
             except KeyError:
               defaultUserName = 'John Doe <john@doe.net>'
+              player = None
               js_focus = '''onfocus="if(this.value=='%s') this.value='';"''' % defaultUserName
+
+            else:
+              # Look up the player so we can see if they want emails
+              player = bballdb.getPlayerStatusForEmail(defaultUserName)
+
+            # Set the no email checkbox based on previous status
+            if player is None or not player.sendEmail:
+                checked = 'checked="checked"'
+            else:
+                checked = ''
 
             js_focus += ''' onblur="if(this.value=='') this.value='%s';" ''' % defaultUserName
 
@@ -258,6 +269,14 @@ class AddName(webapp2.RequestHandler):
              <html>
                <head><title>%(title)s Basketball Sign-up</title>
                %(head)s
+               <style>
+               .checkwrap {
+                margin-bottom: 1em;
+                font-style: italic;
+                font-size: smaller;
+                color:#555;
+               }
+               </style>
                </head>
                <body>
                   <h1>Sign up for %(title)s Basketball</h1>
@@ -277,10 +296,16 @@ class AddName(webapp2.RequestHandler):
                     <option value="4x4">4x4</option>
                     </div>
                     -->
+                    <div class="checkwrap">
+                    <input type="checkbox" id="sendemail" name="sendemail" %(checked)s/>
+                    <label for="sendemail"
+                        title="Select this if you don't plan to play regularly"> I don't want emails on M/W/F reminding me to sign up</label>
+                    </div>
                     <div><input type="submit" value="I wanna play today!"></div>
                   </form>
                 </body>
-              </html>''' % {'title':PAGE_TITLE,'name':defaultUserName, 'focus':js_focus, 'head':htmlHead()})
+              </html>''' % {'title':PAGE_TITLE,'name':defaultUserName, 'focus':js_focus, 'head':htmlHead(),
+              'checked': checked})
         # elif bballdb.isTimeBeforeListPost(): # Signup is off, but early enough that someone could start the list
         #     self.response.out.write('''
         #      <html>
@@ -310,10 +335,16 @@ class AddName(webapp2.RequestHandler):
     def post(self):
 
         player = self.request.get('player')
+        send_email_status = self.request.get('sendemail')
+        if send_email_status:
+            sendEmail = False
+        else:
+            sendEmail = True
+
         #pref   = self.request.get('pref')
         pref = "4x4"
         try:
-          newPlayer = bballdb.addSignUpPlayer(player,pref)
+          newPlayer = bballdb.addSignUpPlayer(player,pref,sendEmail)
         except bballdb.InvalidEmailException: # Error - unknown user tried to sign up
           self.response.out.write('''
             <html>

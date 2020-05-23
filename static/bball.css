@@ -11,7 +11,7 @@ body{
   /*font-family:Helvetica Neue,Helvetica,Calibri,Verdana,Arial,Liberation Sans,DejaVu Sans,sans-serif;*/
   font-size:80%;
   background:white;
-  padding:3px;
+  padding:1em;
   /*border-style:solid;
   border-width:1px;
   margin:0px;*/
@@ -162,7 +162,8 @@ td.td_button {
   margin:2px;
 /*  height:3em;*/
 }
-.a_button {
+.a_button,
+input[type="submit"] {
     font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
     background-color: #FFE5AC; /*FFF0CF;*/
     border: 1px solid #FDC54C;
@@ -170,24 +171,28 @@ td.td_button {
     text-indent: 0;
     display: inline-block;
     color: #505050;
-    font-size: 20px;
+    font-size: 18px;
     font-weight: bold;
     font-style: normal;
     text-decoration: none;
     text-align: center;
-    padding: 5px;
-    margin-left: 2em;
+    padding: 5px 10px 5px 10px;
     vertical-align: middle;
     overflow: hidden;
     text-overflow: ellipsis;
 /*    max-height: 2em;*/
 }
-.a_button:hover {
+.a_button {
+  margin-left: 2em;
+}
+.a_button:hover,
+input[type="submit"]:hover {
   background-color: #FAC34C;
   color: #015763;
   text-decoration: none;
 }
-.a_button:active {
+.a_button:active,
+input[type="submit"]:active {
   position:relative;
   top:1px;
 }
@@ -195,12 +200,12 @@ td.td_button {
 /* Headings */
 h1 {
   font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
-  text-align:center; 
+  text-align:center;
   padding:10px;
 }
 h2 {
   font-family: "Open Sans Condensed",varela,"century gothic",helvetica,arial,sans-serif;
-  text-align:center; 
+  text-align:center;
   padding:10px;
 }
 
@@ -295,13 +300,16 @@ tr.alist td {
 }
 
 @media screen and (max-width: 960px) and (max-device-width : 480px){
-  .a_button {
+  .a_button,
+  input[type="submit"] {
     font-size:95%;
+    padding: 5px;
    /* line-height:90%;
     padding:3px; */
   }
   body{
     font-size:3vw;
+    padding: 3px;
   }
   pre{
     font-size:90%;
@@ -346,13 +354,16 @@ tr.alist td {
 }
 
 @media screen and (max-width: 640px) and (max-device-width : 480px){
-  /*.a_button {
+  .a_button,
+  input[type="submit"] {
     font-size:110%;
-    line-height:90%;
-    padding:3px;
-  }*/
+    padding: 5px;
+   /* line-height:90%;
+    padding:3px; */
+  }
   body{
     font-size:3vw;
+    padding: 3px;
   }
   pre{
     font-size:100%;
