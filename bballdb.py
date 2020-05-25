@@ -288,8 +288,10 @@ def _getNameForEmail(email):
 
 def getPlayerStatusForEmail(email):
     '''given an email (possibly including real name), return the PlayerStatus object'''
-    parsed = emailParser(email)
-    email = parsed.email
+    _, email = emailParser(email)
+
+    if email is None:
+        return None
 
     q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
                             default_options = ndb.QueryOptions(keys_only = True))

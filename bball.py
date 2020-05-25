@@ -43,6 +43,7 @@ def htmlHead():
    <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
    <!-- <link href='http://fonts.googleapis.com/css?family=Raleway' rel='stylesheet' type='text/css'>-->
    <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+   <link href='http://fonts.googleapis.com/css?family=Open+Sans:400' rel='stylesheet' type='text/css'>
    <meta name="viewport" content="width=device-width"/>'''
 
 class MainPage(webapp2.RequestHandler):
@@ -57,6 +58,7 @@ class DirectionsPage(webapp2.RequestHandler):
         <head>
            <link href='http://fonts.googleapis.com/css?family=Varela' rel='stylesheet' type='text/css'>
            <link href='http://fonts.googleapis.com/css?family=Open+Sans+Condensed:300' rel='stylesheet' type='text/css'>
+           <link href='http://fonts.googleapis.com/css?family=Open+Sans:400' rel='stylesheet' type='text/css'>
            <meta name="viewport" content="width=device-width"/>
            <link rel="stylesheet" type="text/css" href="static/bball.css" />
         </head>
@@ -299,7 +301,7 @@ class AddName(webapp2.RequestHandler):
                     <div class="checkwrap">
                     <input type="checkbox" id="sendemail" name="sendemail" %(checked)s/>
                     <label for="sendemail"
-                        title="Select this if you don't plan to play regularly"> I don't want emails on M/W/F reminding me to sign up</label>
+                        title="Select this if you don't plan to play regularly"> I <b>don't</b> want emails on M/W/F reminding me to sign up</label>
                     </div>
                     <div><input type="submit" value="I wanna play today!"></div>
                   </form>
@@ -480,9 +482,9 @@ class RemoveName(webapp2.RequestHandler):
 
     def post(self):
 
-        player = self.request.get('player')
-        status, player = bballdb.removeSignUpPlayer(player)
-        self.response.set_cookie('emailAddress', player, max_age=31536000, secure=False)
+        player_cookie = self.request.get('player')
+        status, player = bballdb.removeSignUpPlayer(player_cookie)
+        self.response.set_cookie('emailAddress', player_cookie, max_age=31536000, secure=False)
         if status:
             self.response.out.write('''
             <html>
