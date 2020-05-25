@@ -171,17 +171,11 @@ def get_game_props(weekday=None):
   day.put()
   return day
 
-# Update the player status
-def updatePlayerStatus(signup_player, playing, overflow):
-    '''Given an email/name, find an entry in the PlayerStatus database and update it'''
+def getOrCreatePlayerStatus(name, email):
+    '''Get a player with email matching "email". If none is found,
+        create a new entry.'''
     q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
                               default_options = ndb.QueryOptions(keys_only = True))
-
-    # Sanitize
-    name, email = signup_player.name, signup_player.email
-
-    if (email == None):
-      return False, None
 
     playerKeys = q.filter(PlayerStatus.email == email)
 
@@ -206,9 +200,8 @@ def updatePlayerStatus(signup_player, playing, overflow):
                       priorityScore = 0,
                       isAlist = False,
                       sendEmail = True)
-
-      update_player_status(player, signup_player, playing, overflow)
       player.put()
+      return player
     else:
       for playerKey in playerKeys:
           try:
@@ -216,9 +209,20 @@ def updatePlayerStatus(signup_player, playing, overflow):
           except BadValueError:
             continue
 
-          update_player_status(player, signup_player, playing, overflow)
-          player.put()
-          break
+          return player
+
+# Update the player status
+def updatePlayerStatus(signup_player, playing, overflow):
+    '''Given an email/name, find an entry in the PlayerStatus database and update it'''
+    # Sanitize
+    name, email = signup_player.name, signup_player.email
+
+    if (email == None):
+      return False, None
+
+    player = getOrCreatePlayerStatus(name, email)
+    update_player_status(player, signup_player, playing, overflow)
+    player.put()
 
 def update_player_status(player, signup_player, playing, overflow):
   '''Update a players status data'''
@@ -307,22 +311,13 @@ def _getNameForEmail(email):
 
 def getPlayerStatusForEmail(email):
     '''given an email (possibly including real name), return the PlayerStatus object'''
-    _, email = emailParser(email)
+    name, email = emailParser(email)
 
     if email is None:
         return None
 
-    q = PlayerStatus.query(ancestor = ndb.Key('GameStatus','Bball'),
-                            default_options = ndb.QueryOptions(keys_only = True))
-    playerKeys = q.filter(PlayerStatus.email == email.lower())
-    for player in playerKeys:
-        try:
-            player = player.get()
-        except:
-            continue
-        else:
-            return player
-    return None
+    player = getOrCreatePlayerStatus(name, email)
+    return player
 
 # Returns a tuple of the full address, sanitized, and the raw email address
 def emailParser(email):

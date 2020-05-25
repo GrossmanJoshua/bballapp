@@ -8,8 +8,8 @@ import datetime
 def emailFromAdmin(recipient, sub, content, wholelist=False):
 
     if not bballdb.getSendEmails():
-        logging.info("Emails are disabled; not seding email To: %s Subject: %s" % (recipient, sub) )
-        logging.info(content)
+        logging.info("Emails are disabled; not sending email To: %s Subject: %s" % (recipient, sub) )
+        # logging.info(content)
         return
 
     logging.info("Sent email To: %s Subject: %s" % (recipient, sub) )
