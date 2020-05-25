@@ -126,6 +126,17 @@ def today():
   today = datetime.today()
   return today + Eastern_tzinfo().utcoffset(today)
 
+def ndays_since(d):
+    '''number of days since d'''
+    a = today()
+    d = datetime(
+        year=d.year,
+        month=d.month,
+        day=d.day,
+    )
+    diff = a - d
+    return diff.days
+
 def get_game_props(weekday=None):
   '''Return a GameProperties object for the current day of the week'''
   q = GameProperties.query(default_options = ndb.QueryOptions(keys_only = True))
@@ -227,6 +238,16 @@ def update_player_status(player, signup_player, playing, overflow):
     hour -= 24
   minutes_7am = (hour - 7) * 60 + ts.minute
 
+  # Update the score based on the weeks since last signup
+  if player.priorityScore > 0:
+      days_since_last_signup = ndays_since(player.lastSignup)
+      weeks_since_last_signup = int(days_since_last_signup//7)
+      weeks_since_last_signup += 1
+      if weeks_since_last_signup >= player.priorityScore:
+          player.priorityScore = 0
+      else:
+          player.priorityScore -= weeks_since_last_signup
+
   player.lastSignup = today()
   player.numSignups += 1
 
@@ -249,8 +270,6 @@ def update_player_status(player, signup_player, playing, overflow):
     elif mwf == 4:
       player.gamesPlayedF += 1
 
-    if overflow and player.priorityScore > 0:
-      player.priorityScore -= 1
   else:
     player.gamesCut += 1
     player.lastCut = player.lastSignup
