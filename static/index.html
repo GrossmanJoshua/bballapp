@@ -55,38 +55,57 @@ function qualifyURL(url) {
 <iframe id="forecast_embed" type="text/html" height="245" width="100%" frameborder="0" src="http://forecast.io/embed/#lat=42.45831&lon=-71.400468&name=Concord&color=#1047A9"> </iframe>
 -->
 
-<p>The basketball games in Concord are managed via an automated email system.
-An email will come out every morning at <span id="emph">7:00AM</span> announcing the game.
-Follow the directions there to add yourself to the game roster. You should get an email saying if the game is on or off at <span id="emph">~11:00</span>.</p>
+<p>The basketball games in Concord are managed via an automated system. If
+  you would like to play, click the button above and enter your name/email address.
+</p>
+<p> For subscribed users,
+an email will come out every morning at <span id="emph">7:00AM</span> announcing the game.
+You can follow the directions there to add yourself to the game roster.
+You should get an email saying if the game is on or off at <span id="emph">~11:00</span>.</p>
 
 <p>
-If you would like to receive daily messages, send an email to the following address requesting addition:
+If you would like to receive daily messages, make sure the checkbox on the signup
+page is unchecked.
 </p>
 
-<p id="indented">
+<!-- <p id="indented">
  <script type="text/javascript">myAdminAddress('Basketball administrator')</script>
-</p>
+</p> -->
 
 <p>The roster for today's game can be viewed at any time at the following URL:</p>
 
 <p id="indented"><a href="../roster" target="_blank"><script type="text/javascript">document.write(qualifyURL("../roster"))</script></a></p>
- 
+
 <p>When there is a game, it is played at noon at:</p>
 
-<iframe src="../directions" scrolling="no" height="600px" width="100%" style="border:none"></iframe>
+<script>
+function loadDoc() {
+  var xhttp = new XMLHttpRequest();
+  xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+     document.getElementById("directions").innerHTML = this.responseText;
+    }
+  };
+  xhttp.open("GET", "../directions", true);
+  xhttp.send();
+}
+document.addEventListener('DOMContentLoaded', loadDoc);
+</script>
+<div id="directions"></div>
+<!-- <iframe src="../directions" scrolling="no" height="600px" width="100%" style="border:none"></iframe> -->
 
 <!--
 <p id="block">Percy Rideout Playground</p>
 <a href="http://goo.gl/maps/LH5GZ" target="_blank"><p id="block">Intersection of Laws Brook Road and Conant St</p>
 <p id="block">West Concord, MA 01742</p></a>
- 
+
 <p>Courts are on the Laws Brook Road side of the park.</p>
 
 <iframe src="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d3081.5904116212882!2d-71.399879!3d42.457339999999995!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x89e3908e05aced69%3A0xdb622158aef8cecc!2sRideout+Playground!5e1!3m2!1sen!2sus!4v1411135681769" width="95%" height="450" frameborder="0" style="border:0"></iframe>
 -->
 
 
-<!-- 
+<!--
 <p id="block">Hunt Recreation Center</p>
 <a href="https://goo.gl/maps/tN72M" target="_blank"><p id="block">90 Stow St</p>
 <p id="block">Concord, MA 01742</p></a>

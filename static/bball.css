@@ -2,7 +2,7 @@ html {
     margin: 0;
     width: 100%;
     height: 100%;
-    background:#F5F5F5;
+    background:#fdfdfd;
 }
 body{
   min-width:298px;
@@ -17,6 +17,11 @@ body{
   margin:0px;*/
   margin-left: auto;
   margin-right: auto;
+  border-radius: 8px;
+  -webkit-box-shadow: 0px 0px 20px -10px rgba(0,0,0,0.5);
+  -moz-box-shadow: 0px 0px 20px -10px rgba(0,0,0,0.5);
+  box-shadow: 0px 0px 20px -10px rgba(0,0,0,0.5);
+
 }
 body.wide {
   max-width: 1280px;
@@ -38,6 +43,7 @@ h2 {
   /*font-family: Raleway,varela,"century gothic",helvetica,arial,sans-serif;*/
   /*font-weight: 300;*/
   /*color:darkgray;*/
+  color: #555;
   font-style:italic;
   text-align:center;
   padding-left:5%;
