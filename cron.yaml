@@ -1,9 +1,9 @@
 cron:
 
 # Could be replaced with M-F Intellicast Weather reports
-- description: daily summary job  
+- description: start list
   url: /control?function=startRoster&arg1=False&arg2=False
-  schedule: every mon,wed,fri 07:00
+  schedule: every mon,fri 07:00
   timezone: US/Eastern
 
 # - description: daily summary job
@@ -11,17 +11,17 @@ cron:
 #   schedule: every tue,thu 06:00
 #   timezone: US/Eastern
 
-- description: daily summary job  
+- description: start the early roster one day prior
   url: /control?function=startEarlyRoster
-  schedule: every sun,tue,thu 18:00
+  schedule: every sun,thu 18:00
   timezone: US/Eastern
 
-- description: daily summary job  
+- description: post the roster at 11AM
   url: /control?function=postRoster&arg1=False
   schedule: every mon,tue,wed,thu,fri 11:00
   timezone: US/Eastern
 
-- description: daily summary job  
+- description: clear the list
   url: /control?function=removePlayers
   schedule: every mon,tue,wed,thu,fri 17:00
   timezone: US/Eastern
